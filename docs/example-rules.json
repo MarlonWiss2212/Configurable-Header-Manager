@@ -1,0 +1,44 @@
+{
+  "rules": [
+    {
+      "enabled": true,
+      "urlPattern": "*://api.example.com/*",
+      "type": "request",
+      "operation": "set",
+      "headerName": "Authorization",
+      "headerValue": "Bearer your-token-here"
+    },
+    {
+      "enabled": true,
+      "urlPattern": "*://staging.example.com/*",
+      "type": "request",
+      "operation": "set",
+      "headerName": "X-Environment",
+      "headerValue": "staging"
+    },
+    {
+      "enabled": true,
+      "urlPattern": "http://localhost:*/*",
+      "type": "response",
+      "operation": "set",
+      "headerName": "Access-Control-Allow-Origin",
+      "headerValue": "*"
+    },
+    {
+      "enabled": false,
+      "urlPattern": "*",
+      "type": "response",
+      "operation": "remove",
+      "headerName": "X-Frame-Options",
+      "headerValue": ""
+    },
+    {
+      "enabled": true,
+      "urlPattern": "https://cdn.example.com/*",
+      "type": "response",
+      "operation": "append",
+      "headerName": "Cache-Control",
+      "headerValue": ", immutable"
+    }
+  ]
+}

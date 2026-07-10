@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Chrome (MV3)
+        run: pnpm build && pnpm zip
+
+      - name: Build Firefox (MV2)
+        run: pnpm build:firefox && pnpm zip:firefox
+
+      # ── Firefox Add-ons (AMO) ─────────────────────────────────────────────
+      # Requires secrets: FIREFOX_JWT_ISSUER, FIREFOX_JWT_SECRET
+      # Generate at: https://addons.mozilla.org/developers/addon/api/key/
+      - name: Sign and submit to Firefox AMO
+        if: ${{ vars.FIREFOX_PUBLISH == 'true' }}
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+        run: |
+          pnpm dlx web-ext sign \
+            --source-dir .output/firefox-mv2 \
+            --channel listed
+
+      # ── Chrome Web Store ──────────────────────────────────────────────────
+      # Requires secrets: CHROME_EXTENSION_ID, CHROME_CLIENT_ID,
+      #                   CHROME_CLIENT_SECRET, CHROME_REFRESH_TOKEN
+      # Obtain credentials via Google OAuth2 (Web Store API):
+      # https://developer.chrome.com/docs/webstore/using-api
+      - name: Upload to Chrome Web Store
+        if: ${{ vars.CHROME_PUBLISH == 'true' }}
+        env:
+          EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: |
+          ZIP=$(ls .output/*.zip | grep -v firefox | head -1)
+          ACCESS_TOKEN=$(curl -s -X POST https://oauth2.googleapis.com/token \
+            -d "client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&refresh_token=$REFRESH_TOKEN&grant_type=refresh_token" \
+            | jq -r .access_token)
+          curl -s -X PUT \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/$EXTENSION_ID" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -T "$ZIP"
+          curl -s -X POST \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/$EXTENSION_ID/publish" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Length: 0"
+
+      # ── GitHub Release ────────────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: .output/*.zip
+          generate_release_notes: true

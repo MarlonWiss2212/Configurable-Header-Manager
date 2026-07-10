@@ -1,0 +1,31 @@
+{
+  "name": "configurable-header-manager",
+  "description": "Add, modify, or remove HTTP request and response headers per URL pattern.",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "lint": "oxlint src entrypoints",
+    "lint:fix": "oxlint --fix src entrypoints",
+    "fmt": "oxfmt --write src entrypoints wxt.config.ts",
+    "fmt:check": "oxfmt --check src entrypoints wxt.config.ts",
+    "check": "pnpm compile && pnpm lint && pnpm fmt:check",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "oxfmt": "latest",
+    "oxlint": "latest",
+    "typescript": "^5.9.3",
+    "wxt": "^0.20.27"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "spawn-sync"]
+  }
+}
