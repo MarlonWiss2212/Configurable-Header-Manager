@@ -1,10 +1,10 @@
 /** Escape a value for safe innerHTML insertion */
 export function esc(s: unknown): string {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 /** Get a DOM element by ID */
@@ -14,7 +14,7 @@ export function $<T extends HTMLElement>(id: string): T {
 
 /** Get the value of the checked radio input in a group */
 export function getRadio(name: string): string {
-  return document.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value ?? '';
+  return document.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value ?? "";
 }
 
 /** Check a specific radio input by name + value */

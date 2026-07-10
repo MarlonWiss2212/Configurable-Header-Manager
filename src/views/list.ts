@@ -1,5 +1,5 @@
-import type { Rule } from '../types';
-import { esc } from '../utils';
+import type { Rule } from "../types";
+import { esc } from "../utils";
 
 export interface ListCallbacks {
   onToggle: (id: number, enabled: boolean) => void;
@@ -7,33 +7,35 @@ export interface ListCallbacks {
   onDelete: (id: number) => void;
 }
 
-function opBadgeClass(op: Rule['operation']): string {
-  if (op === 'remove') return 'badge-remove';
-  if (op === 'append') return 'badge-append';
-  return 'badge-set';
+function opBadgeClass(op: Rule["operation"]): string {
+  if (op === "remove") return "badge-remove";
+  if (op === "append") return "badge-append";
+  return "badge-set";
 }
 
 function ruleRow(r: Rule): string {
-  const url = r.urlPattern?.trim() || '*';
+  const url = r.urlPattern?.trim() || "*";
   const safeId = Number(r.id);
   return `
-    <li class="rule-row${r.enabled ? '' : ' rule-disabled'}" data-id="${safeId}">
-      <label class="toggle" title="${r.enabled ? 'Disable' : 'Enable'} rule">
-        <input class="toggle-cb" type="checkbox" data-id="${safeId}"${r.enabled ? ' checked' : ''}
+    <li class="rule-row${r.enabled ? "" : " rule-disabled"}" data-id="${safeId}">
+      <label class="toggle" title="${r.enabled ? "Disable" : "Enable"} rule">
+        <input class="toggle-cb" type="checkbox" data-id="${safeId}"${r.enabled ? " checked" : ""}
           aria-label="Toggle ${esc(r.headerName)}">
         <span class="toggle-track"><span class="toggle-thumb"></span></span>
       </label>
 
       <div class="rule-info">
         <div class="rule-main">
-          <span class="badge ${r.type === 'response' ? 'badge-res' : 'badge-req'}">
-            ${r.type === 'response' ? 'RES' : 'REQ'}
+          <span class="badge ${r.type === "response" ? "badge-res" : "badge-req"}">
+            ${r.type === "response" ? "RES" : "REQ"}
           </span>
           <span class="badge ${opBadgeClass(r.operation)}">${r.operation.toUpperCase()}</span>
           <span class="rule-name">${esc(r.headerName)}</span>
-          ${r.operation !== 'remove' && r.headerValue
-            ? `<span class="rule-sep">:</span><span class="rule-val">${esc(r.headerValue)}</span>`
-            : ''}
+          ${
+            r.operation !== "remove" && r.headerValue
+              ? `<span class="rule-sep">:</span><span class="rule-val">${esc(r.headerValue)}</span>`
+              : ""
+          }
         </div>
         <div class="rule-url">${esc(url)}</div>
       </div>
@@ -79,19 +81,17 @@ export function renderList(
   callbacks: ListCallbacks,
 ): void {
   const activeCount = rules.filter((r) => r.enabled).length;
-  countEl.textContent = rules.length ? `${activeCount} of ${rules.length} active` : '';
+  countEl.textContent = rules.length ? `${activeCount} of ${rules.length} active` : "";
 
-  container.innerHTML = rules.length ? rules.map(ruleRow).join('') : emptyState();
+  container.innerHTML = rules.length ? rules.map(ruleRow).join("") : emptyState();
 
-  container.querySelectorAll<HTMLInputElement>('.toggle-cb').forEach((cb) => {
-    cb.addEventListener('change', () =>
-      callbacks.onToggle(Number(cb.dataset.id), cb.checked),
-    );
+  container.querySelectorAll<HTMLInputElement>(".toggle-cb").forEach((cb) => {
+    cb.addEventListener("change", () => callbacks.onToggle(Number(cb.dataset.id), cb.checked));
   });
-  container.querySelectorAll<HTMLButtonElement>('.edit-btn').forEach((btn) => {
-    btn.addEventListener('click', () => callbacks.onEdit(Number(btn.dataset.id)));
+  container.querySelectorAll<HTMLButtonElement>(".edit-btn").forEach((btn) => {
+    btn.addEventListener("click", () => callbacks.onEdit(Number(btn.dataset.id)));
   });
-  container.querySelectorAll<HTMLButtonElement>('.del-btn').forEach((btn) => {
-    btn.addEventListener('click', () => callbacks.onDelete(Number(btn.dataset.id)));
+  container.querySelectorAll<HTMLButtonElement>(".del-btn").forEach((btn) => {
+    btn.addEventListener("click", () => callbacks.onDelete(Number(btn.dataset.id)));
   });
 }

@@ -1,8 +1,18 @@
-import type { Rule } from './types';
+import type { Rule } from "./types";
 
 const RESOURCE_TYPES = [
-  'main_frame', 'sub_frame', 'stylesheet', 'script', 'image',
-  'font', 'object', 'xmlhttprequest', 'ping', 'media', 'websocket', 'other',
+  "main_frame",
+  "sub_frame",
+  "stylesheet",
+  "script",
+  "image",
+  "font",
+  "object",
+  "xmlhttprequest",
+  "ping",
+  "media",
+  "websocket",
+  "other",
 ] as const;
 
 export async function applyRulesToDNR(rules: Rule[]): Promise<void> {
@@ -15,7 +25,7 @@ export async function applyRulesToDNR(rules: Rule[]): Promise<void> {
         header: r.headerName.trim(),
         operation: r.operation,
       };
-      if (r.operation !== 'remove') headerEntry.value = r.headerValue;
+      if (r.operation !== "remove") headerEntry.value = r.headerValue;
 
       const condition: { resourceTypes: readonly string[]; urlFilter?: string } = {
         resourceTypes: RESOURCE_TYPES,
@@ -23,14 +33,14 @@ export async function applyRulesToDNR(rules: Rule[]): Promise<void> {
 
       // Pass pattern directly — never strip wildcards. Omit urlFilter to match all URLs.
       const pattern = r.urlPattern.trim();
-      if (pattern && pattern !== '*') condition.urlFilter = pattern;
+      if (pattern && pattern !== "*") condition.urlFilter = pattern;
 
       return {
         id: r.id,
         priority: 1,
         action: {
-          type: 'modifyHeaders' as const,
-          [r.type === 'response' ? 'responseHeaders' : 'requestHeaders']: [headerEntry],
+          type: "modifyHeaders" as const,
+          [r.type === "response" ? "responseHeaders" : "requestHeaders"]: [headerEntry],
         },
         condition,
       };

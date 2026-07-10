@@ -1,12 +1,12 @@
-import type { Rule } from './types';
+import type { Rule } from "./types";
 
 function isValidRule(r: unknown): r is Rule {
-  if (!r || typeof r !== 'object') return false;
+  if (!r || typeof r !== "object") return false;
   const rule = r as Record<string, unknown>;
   return (
-    typeof rule.id === 'number' &&
-    typeof rule.enabled === 'boolean' &&
-    typeof rule.headerName === 'string' &&
+    typeof rule.id === "number" &&
+    typeof rule.enabled === "boolean" &&
+    typeof rule.headerName === "string" &&
     rule.headerName.trim().length > 0
   );
 }

@@ -1,6 +1,6 @@
 // browser + defineBackground are WXT auto-imports
-import { applyRulesToDNR } from '@/src/dnr';
-import type { Rule } from '@/src/types';
+import { applyRulesToDNR } from "@/src/dnr";
+import type { Rule } from "@/src/types";
 
 export default defineBackground(async () => {
   browser.runtime.onInstalled.addListener(async () => {
