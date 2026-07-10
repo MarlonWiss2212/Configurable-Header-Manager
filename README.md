@@ -121,6 +121,12 @@ Good hosts: GitHub raw URLs, S3 public buckets, any static CDN.
 
 ---
 
+## Privacy & Data Security
+
+This extension collects no user data. See [PRIVACY.md](PRIVACY.md) for the full breakdown — permissions justification, data storage, and the no-remote-code declaration.
+
+---
+
 ## CI / CD
 
 Every push and pull request runs:

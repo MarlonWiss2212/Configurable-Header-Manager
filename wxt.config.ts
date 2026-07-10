@@ -11,10 +11,11 @@ export default defineConfig({
       gecko: {
         id: "header-manager@local",
         strict_min_version: "128.0",
+        data_collection_permissions: {
+          required: ["none"],
+          optional: [],
+        },
       },
     },
-  },
-  suppressWarnings: {
-    firefoxDataCollection: true,
   },
 });
