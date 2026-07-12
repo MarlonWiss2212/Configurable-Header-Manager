@@ -3,8 +3,7 @@ import { defineConfig } from "wxt";
 export default defineConfig({
   manifest: {
     name: "Configurable Header Manager",
-    version: "1.0.0",
-    description: "Add, modify, or remove HTTP request and response headers per URL pattern.",
+    // version + description are inherited from package.json (single source of truth)
     permissions: ["storage", "declarativeNetRequest"],
     host_permissions: ["<all_urls>"],
     browser_specific_settings: {
