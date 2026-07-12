@@ -1,25 +1,48 @@
 # Rule Format
 
 Rules are stored and exchanged as a plain JSON object. No external libraries required.
+The current format is schema version 2.
 
 ## Schema
 
 ```json
 {
+  "schemaVersion": 2,
+  "folders": [
+    {
+      "id": "staging",
+      "name": "Staging",
+      "rules": [
+        {
+          "enabled": true,
+          "urlPattern": "*://api.example.com/*",
+          "type": "request",
+          "operation": "set",
+          "headerName": "Authorization",
+          "headerValue": "Bearer token123",
+          "name": "Staging auth",
+          "comment": "Token for the staging API"
+        }
+      ]
+    }
+  ],
   "rules": [
     {
-      "enabled": true,
-      "urlPattern": "*://api.example.com/*",
-      "type": "request",
-      "operation": "set",
-      "headerName": "Authorization",
-      "headerValue": "Bearer token123"
+      "enabled": false,
+      "urlPattern": "*",
+      "type": "response",
+      "operation": "remove",
+      "headerName": "X-Frame-Options",
+      "headerValue": ""
     }
   ]
 }
 ```
 
-## Fields
+`folders` and each `rules` array are ordered. Reordering in the popup changes array order.
+Top-level `rules` are ungrouped rules. Rules inside folders do not include a `folder` field; their folder comes from the JSON tree.
+
+## Rule Fields
 
 | Field | Type | Required | Default | Description |
 |---|---|---|---|---|
@@ -29,8 +52,38 @@ Rules are stored and exchanged as a plain JSON object. No external libraries req
 | `operation` | `"set"` \| `"remove"` \| `"append"` | **Yes** | — | What to do with the header |
 | `headerName` | `string` | **Yes** | — | HTTP header name (case-insensitive) |
 | `headerValue` | `string` | For `set`/`append` | `""` | Header value (ignored for `remove`) |
+| `name` | `string` | No | — | **Display only.** Shown in the list instead of the header name |
+| `comment` | `string` | No | — | **Display only.** Free-text note shown in the list |
 
 > **Note:** `append` is only supported for **response** headers. The UI disables it for request headers automatically.
+>
+> `name` and `comment` never affect matching and are never sent with requests.
+
+## Folder Fields
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `id` | `string` | **Yes** | Stable folder id used for storage/UI state |
+| `name` | `string` | **Yes** | Folder label shown in the popup |
+| `rules` | `Rule[]` | **Yes** | Ordered rules in this folder |
+
+## Legacy Imports
+
+The importer still accepts the old flat format:
+
+```json
+{
+  "rules": [
+    {
+      "headerName": "X-Api-Key",
+      "headerValue": "token",
+      "folder": "Staging"
+    }
+  ]
+}
+```
+
+It is migrated to schema v2 on import or storage load.
 
 ## URL Pattern Syntax
 
@@ -39,14 +92,20 @@ Rules are stored and exchanged as a plain JSON object. No external libraries req
 | Pattern | Matches |
 |---|---|
 | `*` or `""` | All URLs |
+| `example.com` | example.com and its subdomains/paths — **not** `example.com.evil.net` |
 | `*://example.com/*` | Any protocol + example.com + any path |
 | `https://api.example.com/*` | HTTPS requests to api.example.com only |
 | `*://*/api/*` | Any URL with `/api/` in the path |
 | `http://localhost:*/*` | Localhost on any port |
 
-## Importing from a URL
+Patterns without a wildcard are anchored automatically: a bare domain is matched
+at the domain boundary and a full URL at the start of the address, so a
+half-typed pattern like `example.c` will not silently match unrelated sites.
 
-The Import / Export view accepts a URL pointing to a hosted JSON file. The server must include CORS headers:
+## Importing
+
+The Import / Export view accepts pasted JSON, imported `.json` files, or a URL pointing to a hosted JSON file.
+Hosted files must include CORS headers:
 
 ```
 Access-Control-Allow-Origin: *
@@ -60,7 +119,7 @@ Example GitHub raw URL:
 https://raw.githubusercontent.com/your-org/config/main/headers.json
 ```
 
-The URL import only fetches and populates the JSON editor — you still review and click **Import JSON** to apply the rules.
+Imports only populate the JSON editor first — you still review and save to apply the rules.
 
 ## See also
 

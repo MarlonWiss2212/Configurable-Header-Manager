@@ -39,50 +39,50 @@ Load unpacked in your browser:
 
 ## Architecture
 
-Three layers. Dependencies point one way only: **ui → platform → core**.
+Three layers. Dependencies point inward: **presentation → domain** and **data → domain**.
+The domain layer never imports browser APIs, DOM APIs, storage, fetch, or WXT.
 
 ```
-┌────────────────────── ui ──────────────────────┐
-│  The popup: views, DOM helpers, app wiring     │
-│  May import from platform and core             │
-├──────────────────── platform ──────────────────┤
-│  Thin adapters around browser APIs             │
-│  (storage, declarativeNetRequest, fetch)       │
-│  May import from core                          │
-├────────────────────── core ────────────────────┤
-│  The Rule model and all logic                  │
-│  Pure TypeScript — no browser APIs, no DOM     │
+┌──────────────── presentation ────────────────┐
+│  Popup views, components, DOM helpers, app    │
+│  Calls domain use cases                       │
+├──────────────────── data ────────────────────┤
+│  Storage, fetch, DNR, JSON models, migrations │
+│  Implements domain repository interfaces      │
+├─────────────────── domain ───────────────────┤
+│  Entities, use cases, repository contracts,   │
+│  validation, ordering, DNR mapping            │
 └────────────────────────────────────────────────┘
 ```
 
 Rules of thumb when adding code:
 
-- Logic that could run anywhere (validation, mapping, parsing) → `core/`
-- A call to a `browser.*` / network API → `platform/`
-- Anything touching `document` → `ui/`
+- Business rules, entities, use cases, validation, ordering → `domain/`
+- Browser storage, fetch, JSON persistence, migrations, DNR adapters → `data/`
+- Anything touching `document`, HTML, CSS-facing behavior → `presentation/`
 
 ## Project layout
 
 ```
 src/
-├── core/                 Pure logic — fully unit-testable
-│   ├── types.ts          Rule + DNR type declarations (no logic)
-│   ├── rule.ts           Validation, ids, folder grouping
-│   ├── rules-json.ts     Import/export file format (parse, serialize)
-│   └── dnr-rule.ts       Rule → declarativeNetRequest rule mapping
-├── platform/             Browser API adapters
-│   ├── storage.ts        browser.storage.local
-│   ├── dnr.ts            browser.declarativeNetRequest
-│   └── net.ts            fetch hosted rules files
-└── ui/                   The popup
-    ├── types.ts          View ↔ app contracts (no logic)
-    ├── app.ts            Composition root — state + view wiring
-    ├── dom.ts            DOM helpers (byId, escapeHtml, download, …)
-    └── views/
-        ├── list.ts           Rule list behavior (folders, toggles)
-        ├── list-html.ts      Rule list HTML templates
-        ├── form.ts           Add / edit form
-        └── import-export.ts  Import / export view
+├── domain/               Pure app rules — fully unit-testable
+│   ├── entities/         Rule, RuleFolder, RuleState, DNR types
+│   ├── repositories/     Repository interfaces
+│   ├── utils/            Shared pure helpers used by use cases/data adapters
+│   ├── usecases/         App actions such as save/toggle/move rules
+│   └── errors/           Domain error types
+├── data/                 Infrastructure and persistence
+│   ├── datasources/      browser.storage, fetch, DNR, JSON parser
+│   ├── migrations/       Legacy flat rules → schema v2
+│   ├── models/           Stored/imported JSON models
+│   ├── repositories/     Browser repository implementation
+│   └── errors/           Data error types
+└── presentation/         Popup UI, no framework
+    ├── app/              Composition root — state + use case wiring
+    ├── components/       Small HTML helpers
+    ├── icons/            SVG asset helpers
+    ├── types/            View contracts
+    └── views/            List, form, import/export views
 
 tests/                    Vitest suite, mirrors src/ layer by layer
 
@@ -109,16 +109,24 @@ Rules are plain JSON — no custom syntax, no third-party parsers.
 
 ```json
 {
-  "rules": [
+  "schemaVersion": 2,
+  "folders": [
     {
-      "enabled": true,
-      "urlPattern": "*://api.example.com/*",
-      "type": "request",
-      "operation": "set",
-      "headerName": "Authorization",
-      "headerValue": "Bearer token123"
+      "id": "staging",
+      "name": "Staging",
+      "rules": [
+        {
+          "enabled": true,
+          "urlPattern": "*://api.example.com/*",
+          "type": "request",
+          "operation": "set",
+          "headerName": "Authorization",
+          "headerValue": "Bearer token123"
+        }
+      ]
     }
-  ]
+  ],
+  "rules": []
 }
 ```
 
@@ -143,9 +151,10 @@ Full schema and examples: [`docs/rule-format.md`](docs/rule-format.md)
 
 ---
 
-## Importing rules from a URL
+## Importing rules
 
-Open **Import / Export**, paste a URL, and click **Fetch**. The JSON is loaded into the editor for review before you apply it.
+Open **Import / Export** to paste JSON, import from a `.json` file, or fetch a hosted JSON file.
+All import paths load JSON into the editor for review before you apply it.
 
 The URL must be reachable from the browser and the server must allow cross-origin requests:
 
