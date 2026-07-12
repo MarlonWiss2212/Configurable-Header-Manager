@@ -29,27 +29,65 @@ Load unpacked in your browser:
 | `pnpm zip` / `pnpm zip:firefox` | Build + zip for store upload |
 | `pnpm compile` | TypeScript type check |
 | `pnpm lint` / `pnpm lint:fix` | oxlint |
-| `pnpm fmt` / `pnpm fmt:check` | Biome formatter |
+| `pnpm fmt` / `pnpm fmt:check` | oxfmt formatter |
+| `pnpm test` / `pnpm test:watch` | Vitest unit tests |
 | `pnpm check` | compile + lint + fmt:check |
+| `pnpm taze:minor` | Bump dependencies to latest minor versions (writes `package.json`; run `pnpm install` after) |
+| `pnpm taze:major` | Bump dependencies to latest major versions (writes `package.json`; run `pnpm install` after) |
 
 ---
+
+## Architecture
+
+Three layers. Dependencies point one way only: **ui → platform → core**.
+
+```
+┌────────────────────── ui ──────────────────────┐
+│  The popup: views, DOM helpers, app wiring     │
+│  May import from platform and core             │
+├──────────────────── platform ──────────────────┤
+│  Thin adapters around browser APIs             │
+│  (storage, declarativeNetRequest, fetch)       │
+│  May import from core                          │
+├────────────────────── core ────────────────────┤
+│  The Rule model and all logic                  │
+│  Pure TypeScript — no browser APIs, no DOM     │
+└────────────────────────────────────────────────┘
+```
+
+Rules of thumb when adding code:
+
+- Logic that could run anywhere (validation, mapping, parsing) → `core/`
+- A call to a `browser.*` / network API → `platform/`
+- Anything touching `document` → `ui/`
 
 ## Project layout
 
 ```
 src/
-├── types.ts              Shared Rule interface
-├── storage.ts            browser.storage.local helpers
-├── dnr.ts                declarativeNetRequest sync
-├── utils.ts              DOM helpers
-├── app.ts                Event wiring + state management
-└── views/
-    ├── list.ts           Rule list renderer
-    ├── form.ts           Add / edit form
-    └── import-export.ts  JSON import, URL fetch, download
+├── core/                 Pure logic — fully unit-testable
+│   ├── types.ts          Rule + DNR type declarations (no logic)
+│   ├── rule.ts           Validation, ids, folder grouping
+│   ├── rules-json.ts     Import/export file format (parse, serialize)
+│   └── dnr-rule.ts       Rule → declarativeNetRequest rule mapping
+├── platform/             Browser API adapters
+│   ├── storage.ts        browser.storage.local
+│   ├── dnr.ts            browser.declarativeNetRequest
+│   └── net.ts            fetch hosted rules files
+└── ui/                   The popup
+    ├── types.ts          View ↔ app contracts (no logic)
+    ├── app.ts            Composition root — state + view wiring
+    ├── dom.ts            DOM helpers (byId, escapeHtml, download, …)
+    └── views/
+        ├── list.ts           Rule list behavior (folders, toggles)
+        ├── list-html.ts      Rule list HTML templates
+        ├── form.ts           Add / edit form
+        └── import-export.ts  Import / export view
+
+tests/                    Vitest suite, mirrors src/ layer by layer
 
 entrypoints/
-├── background.ts         Service worker — syncs rules on install
+├── background.ts         Service worker — applies rules on install
 └── popup/
     ├── index.html        Popup markup (all three views)
     ├── main.ts           Entry point — 3 lines
@@ -60,8 +98,7 @@ docs/
 └── example-rules.json   Ready-to-use example
 
 .github/workflows/
-├── ci.yml                Type check + lint + build on every push/PR
-└── release.yml           Publish to Chrome Web Store + Firefox AMO on tag
+└── release.yml           Check + test + publish to both stores on a v* tag
 ```
 
 ---
@@ -123,25 +160,31 @@ Good hosts: GitHub raw URLs, S3 public buckets, any static CDN.
 
 ## Privacy & Data Security
 
-This extension collects no user data. See [PRIVACY.md](PRIVACY.md) for the full breakdown — permissions justification, data storage, and the no-remote-code declaration.
+This extension collects no user data. Note that header rules — including any secrets you put in header values — are stored **unencrypted on your device**; see [PRIVACY.md](PRIVACY.md) for the full breakdown, including the at-rest threat model, permissions justification, and the no-remote-code declaration.
 
 ---
 
 ## CI / CD
 
-Every push and pull request runs:
+There is a single workflow, triggered by pushing a version tag. Run the quality gates locally before
+tagging:
 
-1. `pnpm compile` — type check
-2. `pnpm lint` — oxlint
-3. `pnpm fmt:check` — Biome format check
-4. `pnpm build` + `pnpm build:firefox` — both targets
+```bash
+pnpm check   # compile + lint + fmt:check
+pnpm test    # Vitest
+```
 
-Pushing a `v*` tag (e.g. `v2.1.0`) triggers the release workflow:
+The store version comes from `package.json` — bump it (above the currently published version) before
+tagging. Then:
 
-1. Builds and zips both extensions
-2. Publishes to the Chrome Web Store (if `CHROME_PUBLISH=true` repo variable is set)
-3. Signs and submits to Firefox AMO (if `FIREFOX_PUBLISH=true`)
-4. Creates a GitHub Release with the zip files attached
+```bash
+git tag v2.0.1
+git push --tags
+```
+
+The release workflow (`.github/workflows/release.yml`) runs `pnpm check` and `pnpm test`, zips both
+targets, submits to both stores via WXT-native `pnpm wxt submit`, and creates a GitHub Release with
+the zips attached.
 
 **Required secrets** (add in *Settings → Secrets → Actions*):
 
@@ -151,6 +194,7 @@ Pushing a `v*` tag (e.g. `v2.1.0`) triggers the release workflow:
 | `CHROME_CLIENT_ID` | Google OAuth2 client ID |
 | `CHROME_CLIENT_SECRET` | Google OAuth2 client secret |
 | `CHROME_REFRESH_TOKEN` | Google OAuth2 refresh token |
+| `FIREFOX_EXTENSION_ID` | Firefox add-on ID (must equal the published `header-manager@local`) |
 | `FIREFOX_JWT_ISSUER` | Firefox AMO API key |
 | `FIREFOX_JWT_SECRET` | Firefox AMO API secret |
 

@@ -12,17 +12,24 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "lint": "oxlint src entrypoints",
-    "lint:fix": "oxlint --fix src entrypoints",
-    "fmt": "oxfmt --write src entrypoints wxt.config.ts",
-    "fmt:check": "oxfmt --check src entrypoints wxt.config.ts",
+    "lint": "oxlint src entrypoints tests",
+    "lint:fix": "oxlint --fix src entrypoints tests",
+    "fmt": "oxfmt --write src entrypoints tests wxt.config.ts vitest.config.ts",
+    "fmt:check": "oxfmt --check src entrypoints tests wxt.config.ts vitest.config.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check": "pnpm compile && pnpm lint && pnpm fmt:check",
+    "taze:minor": "taze minor -wIr",
+    "taze:major": "taze major -wIr",
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
+    "happy-dom": "latest",
     "oxfmt": "latest",
     "oxlint": "latest",
-    "typescript": "^5.9.3",
+    "taze": "latest",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10",
     "wxt": "^0.20.27"
   }
 }
