@@ -11,34 +11,11 @@
     <div id="view-list" class="view active">
       <header class="app-header">
         <div class="header-brand">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-          </svg>
+          <img class="icon icon-pulse" src="/icons/pulse.svg" alt="" aria-hidden="true" />
           <span>Header Manager</span>
         </div>
         <button id="btn-add" type="button" class="btn btn-primary btn-sm">
-          <svg
-            width="11"
-            height="11"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="3"
-            aria-hidden="true"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <img class="icon icon-add" src="/icons/add.svg" alt="" aria-hidden="true" />
           Add Rule
         </button>
       </header>
@@ -47,19 +24,7 @@
 
       <footer class="app-footer">
         <button id="btn-ie" type="button" class="btn btn-ghost btn-sm">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
+          <img class="icon icon-download" src="/icons/download.svg" alt="" aria-hidden="true" />
           Import / Export
         </button>
         <div class="footer-right">
@@ -81,24 +46,12 @@
             class="btn btn-ghost btn-sm"
             aria-label="Back to rules list"
           >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              aria-hidden="true"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <img class="icon icon-back" src="/icons/back.svg" alt="" aria-hidden="true" />
             Rules
           </button>
         </div>
         <span id="form-title" class="header-title">Add Rule</span>
-        <div class="header-end">
-          <button id="btn-save" type="button" class="btn btn-primary btn-sm">Save</button>
-        </div>
+        <div class="header-end"></div>
       </header>
 
       <main class="form-body">
@@ -149,7 +102,43 @@
             <label for="f-value" class="field-label">Header Value</label>
             <input id="f-value" type="text" class="input" placeholder="e.g. Bearer token123" />
           </div>
+
+          <div class="divider"><span>Display only — never sent with requests</span></div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="f-rule-name" class="field-label">
+                Name <span class="label-optional">optional</span>
+              </label>
+              <input id="f-rule-name" type="text" class="input" placeholder="e.g. Staging auth" />
+            </div>
+            <div class="field">
+              <label for="f-folder" class="field-label">
+                Folder <span class="label-optional">optional</span>
+              </label>
+              <input
+                id="f-folder"
+                type="text"
+                class="input"
+                list="folder-options"
+                placeholder="Group rules"
+              />
+              <datalist id="folder-options"></datalist>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-comment" class="field-label">
+              Comment <span class="label-optional">optional</span>
+            </label>
+            <input id="f-comment" type="text" class="input" placeholder="Why this rule exists" />
+          </div>
         </form>
+
+        <div class="view-actions">
+          <button id="btn-cancel-form" type="button" class="btn btn-ghost">Cancel</button>
+          <button id="btn-save" type="button" class="btn btn-primary">Save</button>
+        </div>
       </main>
     </div>
 
@@ -163,17 +152,7 @@
             class="btn btn-ghost btn-sm"
             aria-label="Back to rules list"
           >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              aria-hidden="true"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <img class="icon icon-back" src="/icons/back.svg" alt="" aria-hidden="true" />
             Rules
           </button>
         </div>
@@ -193,57 +172,52 @@
             />
             <button id="btn-fetch-url" type="button" class="btn btn-ghost btn-sm">Fetch</button>
           </div>
-          <div id="url-error" class="field-error" hidden></div>
           <span class="field-hint">
             Fetches JSON and loads it into the editor below for review. The server must allow
             cross-origin requests.
           </span>
         </section>
 
-        <div class="ie-divider"><span>or paste / edit JSON directly</span></div>
+        <section id="json-import-section" class="ie-section" aria-label="Import from JSON file">
+          <span class="field-label">Import from JSON</span>
+          <label id="json-dropzone" for="json-file-input" class="json-dropzone" tabindex="0">
+            <img
+              class="icon icon-import-json"
+              src="/icons/import-json.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="json-dropzone-title">Import from JSON</span>
+            <span class="json-dropzone-hint">Choose a .json file or drop it here</span>
+          </label>
+          <input
+            id="json-file-input"
+            type="file"
+            class="visually-hidden-file"
+            accept="application/json,.json"
+          />
+        </section>
+
+        <div class="divider"><span>or paste / edit JSON directly</span></div>
 
         <textarea
           id="json-area"
           class="code-area"
           spellcheck="false"
           rows="10"
-          placeholder='{"rules": [...]}'
+          placeholder='{ "schemaVersion": 2, "folders": [], "rules": [] }'
           aria-label="Rules JSON editor"
         ></textarea>
 
-        <div class="ie-actions">
-          <button id="btn-download" type="button" class="btn btn-ghost">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
+        <div id="ie-error" class="field-error" aria-live="polite" hidden></div>
+
+        <div class="view-actions">
+          <button id="btn-download" type="button" class="btn btn-ghost push-start">
+            <img class="icon icon-download" src="/icons/download.svg" alt="" aria-hidden="true" />
             Download .json
           </button>
-          <button id="btn-import" type="button" class="btn btn-primary">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            Import JSON
-          </button>
+          <button id="btn-cancel-ie" type="button" class="btn btn-ghost">Cancel</button>
+          <button id="btn-save-ie" type="button" class="btn btn-primary">Save</button>
         </div>
       </main>
     </div>

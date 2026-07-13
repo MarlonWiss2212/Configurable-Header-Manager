@@ -1,10 +1,12 @@
-// browser + defineBackground are WXT auto-imports
-import { applyRulesToDNR } from "@/src/dnr";
-import type { Rule } from "@/src/types";
+import { ApplyActiveRulesUseCase } from "@/src/domain/usecases/state/apply-active-rules";
+import { LoadRuleStateUseCase } from "@/src/domain/usecases/state/load-rule-state";
+import { BrowserStateRepository } from "@/src/data/repositories/browser-state-repository";
+import { RuleMigrationRepository } from "@/src/data/repositories/rule-migration-repository";
 
-export default defineBackground(async () => {
+export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(async () => {
-    const result = (await browser.storage.local.get({ rules: [] })) as { rules: Rule[] };
-    if (result.rules.length) await applyRulesToDNR(result.rules);
+    const repository = new BrowserStateRepository(new RuleMigrationRepository());
+    const state = await new LoadRuleStateUseCase(repository).execute();
+    await new ApplyActiveRulesUseCase(repository).execute(state);
   });
 });

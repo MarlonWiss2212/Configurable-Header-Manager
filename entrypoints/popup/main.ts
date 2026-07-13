@@ -1,4 +1,4 @@
 import "./style.css";
-import { initApp } from "@/src/app";
+import { initApp } from "@/src/presentation/app/app";
 
-initApp();
+void initApp();

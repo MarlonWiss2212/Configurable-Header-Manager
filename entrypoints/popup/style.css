@@ -168,6 +168,18 @@ body {
   flex-shrink: 0;
 }
 
+.icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.header-brand .icon {
+  width: 18px;
+  height: 18px;
+}
+
 .header-title {
   font-size: 13px;
   font-weight: 600;
@@ -256,6 +268,14 @@ body {
   background: var(--bg-secondary);
   color: var(--text);
 }
+.icon-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+.icon-btn:disabled:hover {
+  background: transparent;
+  color: var(--text-muted);
+}
 .del-btn:hover {
   background: var(--danger-faint);
   color: var(--danger);
@@ -336,6 +356,86 @@ body {
   font-family: ui-monospace, "SF Mono", monospace;
 }
 
+/* Header details when the rule has a custom display name */
+.rule-detail {
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rule-comment {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Folder row ─────────────────────────────────────────────────────────── */
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.folder-row:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+/* Disclosure chevron: points down when expanded, right when collapsed */
+.folder-row .icon-chevron {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.15s;
+}
+.folder-row[aria-expanded="false"] .icon-chevron {
+  transform: rotate(-90deg);
+}
+
+.folder-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Sort arrows appear on hover/focus only, like rule-row actions */
+.folder-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.folder-row:hover .folder-actions,
+.folder-row:focus-within .folder-actions {
+  opacity: 1;
+}
+
+.rule-row.in-folder {
+  padding-left: 32px;
+}
+
 .rule-actions {
   display: flex;
   gap: 2px;
@@ -392,6 +492,14 @@ body {
 .toggle-cb:checked ~ .toggle-track .toggle-thumb {
   transform: translateX(calc(var(--toggle-w) - var(--toggle-knob) - 4px));
 }
+
+/* Folder toggle with some rules on, some off */
+.toggle-cb:indeterminate ~ .toggle-track {
+  background: color-mix(in srgb, var(--toggle-on) 45%, var(--toggle-off));
+}
+.toggle-cb:indeterminate ~ .toggle-track .toggle-thumb {
+  transform: translateX(calc((var(--toggle-w) - var(--toggle-knob)) / 2 - 2px));
+}
 .toggle-cb:focus-visible ~ .toggle-track {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -442,6 +550,12 @@ body {
   text-align: center;
 }
 .empty-state svg {
+  opacity: 0.25;
+  margin-bottom: 4px;
+}
+.empty-state .icon {
+  width: 40px;
+  height: 40px;
   opacity: 0.25;
   margin-bottom: 4px;
 }
@@ -533,6 +647,13 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+.label-optional {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.7;
 }
 
 /* ── Text input ─────────────────────────────────────────────────────────── */
@@ -676,15 +797,15 @@ body {
   flex-shrink: 0;
 }
 
-.ie-divider {
+.divider {
   display: flex;
   align-items: center;
   gap: 10px;
   color: var(--text-muted);
   font-size: 11.5px;
 }
-.ie-divider::before,
-.ie-divider::after {
+.divider::before,
+.divider::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -712,8 +833,67 @@ body {
   box-shadow: 0 0 0 3px var(--primary-faint);
 }
 
-.ie-actions {
+.json-dropzone {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--r-sm);
+  background: var(--bg-secondary);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+}
+.json-dropzone:hover,
+.json-dropzone.drag-over {
+  border-color: var(--primary);
+  background: var(--primary-faint);
+}
+.json-dropzone:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.json-dropzone .icon {
+  grid-row: 1 / span 2;
+  width: 18px;
+  height: 18px;
+}
+
+.json-dropzone-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.json-dropzone-hint {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.visually-hidden-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Bottom action row (form + import/export views) ─────────────────────── */
+.view-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+}
+
+#rule-form + .view-actions {
+  margin-top: 22px;
+}
+
+/* Pushes itself to the left edge, e.g. the download button */
+.push-start {
+  margin-right: auto;
 }
