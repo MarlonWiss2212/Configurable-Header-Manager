@@ -102,7 +102,7 @@ Content-Type: application/json
 
 Example GitHub raw URL:
 ```
-https://raw.githubusercontent.com/your-org/config/main/headers.json
+https://raw.githubusercontent.com/MarlonWiss2212/Configurable-Header-Manager/refs/heads/main/docs/example-rules.json
 ```
 
 Imports only populate the JSON editor first — you still review and save to apply the rules.
