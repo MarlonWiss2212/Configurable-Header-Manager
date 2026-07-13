@@ -9,11 +9,15 @@ export default defineConfig({
     browser_specific_settings: {
       gecko: {
         id: "header-manager@local",
-        strict_min_version: "128.0",
+        // data_collection_permissions requires Firefox 140 (desktop) / 142 (Android)
+        strict_min_version: "140.0",
         data_collection_permissions: {
           required: ["none"],
           optional: [],
         },
+      },
+      gecko_android: {
+        strict_min_version: "142.0",
       },
     },
   },
