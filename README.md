@@ -1,6 +1,6 @@
 # Configurable Header Manager
 
-Modify HTTP request and response headers per URL pattern — for Chrome and Firefox.  
+Modify HTTP request and response headers per URL pattern — for [Chrome](https://chromewebstore.google.com/detail/configurable-header-manag/ohiolpbohklmbigemlkoppafapnceoij?hl=en-GB&utm_source=ext_sidebar) and Firefox.  
 No external runtime dependencies. Vanilla TypeScript + WXT.
 
 **Features**
