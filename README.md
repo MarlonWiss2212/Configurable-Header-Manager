@@ -3,6 +3,15 @@
 Modify HTTP request and response headers per URL pattern — for Chrome and Firefox.  
 No external runtime dependencies. Vanilla TypeScript + WXT.
 
+**Features**
+
+- Set, remove, or append headers on requests and responses, filtered by URL pattern
+- Group rules into folders — toggle, collapse, and reorder them as a unit
+- Optional display name and comment per rule (never sent with requests)
+- Import / export as plain JSON: paste, drop a file, or fetch from a URL
+- Rules are applied by the browser's own declarativeNetRequest engine — the extension
+  never reads your traffic ([privacy](PRIVACY.md))
+
 ---
 
 ## Quick start
@@ -45,37 +54,45 @@ The domain layer never imports browser APIs, DOM APIs, storage, fetch, or WXT.
 ```
 ┌──────────────── presentation ────────────────┐
 │  Popup views, components, DOM helpers, app    │
-│  Calls domain use cases                       │
+│  Calls domain use cases only                  │
 ├──────────────────── data ────────────────────┤
-│  Storage, fetch, DNR, JSON models, migrations │
-│  Implements domain repository interfaces      │
+│  Storage, fetch, DNR, mappers, migrations     │
+│  Implements domain repository + gateways      │
 ├─────────────────── domain ───────────────────┤
-│  Entities, use cases, repository contracts,   │
-│  validation, ordering, DNR mapping            │
+│  Entities (data + invariants), use cases,     │
+│  repository + gateway contracts               │
 └────────────────────────────────────────────────┘
 ```
 
 Rules of thumb when adding code:
 
-- Business rules, entities, use cases, validation, ordering → `domain/`
-- Browser storage, fetch, JSON persistence, migrations, DNR adapters → `data/`
+- Business rules → a use case class with `execute()` in `domain/usecases/<aggregate>/`
+- Data types of the app → `domain/entities/`; shared pure functions → `domain/utils/`
+- Talking to a browser/network API → interface in `domain/repositories/`, repository
+  implementation in `data/repositories/` over dumb `data/datasources/`
 - Anything touching `document`, HTML, CSS-facing behavior → `presentation/`
+- The composition root (`presentation/app/app.ts`, `entrypoints/background.ts`) is the only
+  place allowed to instantiate `data/` classes.
 
 ## Project layout
 
 ```
 src/
 ├── domain/               Pure app rules — fully unit-testable
-│   ├── entities/         Rule, RuleFolder, RuleState, DNR types
-│   ├── repositories/     Repository interfaces
-│   ├── utils/            Shared pure helpers used by use cases/data adapters
-│   ├── usecases/         App actions such as save/toggle/move rules
-│   └── errors/           Domain error types
-├── data/                 Infrastructure and persistence
-│   ├── datasources/      browser.storage, fetch, DNR, JSON parser
-│   ├── migrations/       Legacy flat rules → schema v2
-│   ├── models/           Stored/imported JSON models
-│   ├── repositories/     Browser repository implementation
+│   ├── entities/         Data types only (Rule, RuleFolder, RuleState)
+│   ├── utils/            Shared pure functions (validation, ids, state ops)
+│   ├── repositories/     Contracts: StateRepository, MigrationRepository
+│   └── usecases/         One class per app action, `execute()` each
+│       ├── rules/        save, upsert, delete, toggle, move
+│       ├── folders/      toggle, move, toggle-collapse
+│       ├── state/        load, commit, apply-active
+│       ├── transfer/     import, export, fetch-remote
+│       └── utils/        Helpers shared between use cases
+├── data/                 Infrastructure — implements the domain contracts
+│   ├── datasources/      Dumb I/O: browser.storage, DNR calls, fetch
+│   ├── mappers/          Model ↔ entity, entity → DNR rule
+│   ├── models/           DTOs: persisted rules JSON, DNR rule shape
+│   ├── repositories/     BrowserStateRepository, RuleMigrationRepository
 │   └── errors/           Data error types
 └── presentation/         Popup UI, no framework
     ├── app/              Composition root — state + use case wiring

@@ -1,21 +1,33 @@
 {
+  "schemaVersion": 2,
+  "folders": [
+    {
+      "id": "staging",
+      "name": "Staging",
+      "collapsed": true,
+      "rules": [
+        {
+          "enabled": true,
+          "urlPattern": "*://api.example.com/*",
+          "type": "request",
+          "operation": "set",
+          "headerName": "Authorization",
+          "headerValue": "Bearer your-token-here",
+          "name": "Staging auth",
+          "comment": "Token for the staging API"
+        },
+        {
+          "enabled": true,
+          "urlPattern": "*://staging.example.com/*",
+          "type": "request",
+          "operation": "set",
+          "headerName": "X-Environment",
+          "headerValue": "staging"
+        }
+      ]
+    }
+  ],
   "rules": [
-    {
-      "enabled": true,
-      "urlPattern": "*://api.example.com/*",
-      "type": "request",
-      "operation": "set",
-      "headerName": "Authorization",
-      "headerValue": "Bearer your-token-here"
-    },
-    {
-      "enabled": true,
-      "urlPattern": "*://staging.example.com/*",
-      "type": "request",
-      "operation": "set",
-      "headerName": "X-Environment",
-      "headerValue": "staging"
-    },
     {
       "enabled": true,
       "urlPattern": "http://localhost:*/*",

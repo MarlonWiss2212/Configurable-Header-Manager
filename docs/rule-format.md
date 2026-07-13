@@ -63,27 +63,13 @@ Top-level `rules` are ungrouped rules. Rules inside folders do not include a `fo
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `id` | `string` | **Yes** | Stable folder id used for storage/UI state |
+| `id` | `string` | No | Stable folder id — derived from the folder name when missing |
 | `name` | `string` | **Yes** | Folder label shown in the popup |
 | `rules` | `Rule[]` | **Yes** | Ordered rules in this folder |
+| `collapsed` | `boolean` | No | **Display only.** Whether the folder is collapsed in the list |
 
-## Legacy Imports
-
-The importer still accepts the old flat format:
-
-```json
-{
-  "rules": [
-    {
-      "headerName": "X-Api-Key",
-      "headerValue": "token",
-      "folder": "Staging"
-    }
-  ]
-}
-```
-
-It is migrated to schema v2 on import or storage load.
+> Only `schemaVersion: 2` files are accepted — there is no legacy format support.
+> Exports never contain rule `id`s; importers assign fresh ids and ignore any present.
 
 ## URL Pattern Syntax
 
