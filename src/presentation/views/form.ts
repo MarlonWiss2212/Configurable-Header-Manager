@@ -26,6 +26,7 @@ export function initFormView(handlers: FormHandlers): void {
   byId<HTMLButtonElement>("btn-back-form").addEventListener("click", handlers.onCancel);
   byId<HTMLButtonElement>("btn-cancel-form").addEventListener("click", handlers.onCancel);
   byId<HTMLButtonElement>("btn-save").addEventListener("click", submit);
+  byId<HTMLButtonElement>("btn-save-header").addEventListener("click", submit);
 
   document.querySelectorAll<HTMLInputElement>('input[name="rule-type"]').forEach((radio) =>
     radio.addEventListener("change", () => {

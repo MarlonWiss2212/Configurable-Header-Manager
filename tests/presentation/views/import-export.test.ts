@@ -12,6 +12,7 @@ const FIXTURE = `
   <input id="json-file-input" type="file">
   <button id="btn-download"></button>
   <button id="btn-save-ie"></button>
+  <button id="btn-save-ie-header"></button>
   <textarea id="json-area"></textarea>
   <div id="ie-error" hidden></div>
   <div id="view-list" class="view"></div>
@@ -108,6 +109,20 @@ describe("import/export view", () => {
     });
     (document.getElementById("json-area") as HTMLTextAreaElement).value = '{"rules":[]}';
     document.getElementById("btn-save-ie")?.click();
+    expect(onSave).toHaveBeenCalledWith('{"rules":[]}');
+  });
+
+  it("saves from the header save button too", () => {
+    const onSave = vi.fn();
+    initImportExportView({
+      onCancel: vi.fn(),
+      onSave,
+      getJson: () => "{}",
+      fetchJsonFromUrl: vi.fn(),
+      readJsonFile: vi.fn(),
+    });
+    (document.getElementById("json-area") as HTMLTextAreaElement).value = '{"rules":[]}';
+    document.getElementById("btn-save-ie-header")?.click();
     expect(onSave).toHaveBeenCalledWith('{"rules":[]}');
   });
 

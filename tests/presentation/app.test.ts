@@ -92,4 +92,18 @@ describe("popup app (composition root)", () => {
       expect(document.getElementById("view-list")?.classList.contains("active")).toBe(true);
     });
   });
+
+  it("adds a new rule through the form header save button", async () => {
+    document.getElementById("btn-add")?.click();
+    expect(document.getElementById("view-form")?.classList.contains("active")).toBe(true);
+
+    (document.getElementById("f-name") as HTMLInputElement).value = "X-Header";
+    document.getElementById("btn-save-header")?.click();
+
+    await vi.waitFor(async () => {
+      const stored = await storedState();
+      expect(stored.rules.map((rule) => rule.headerName)).toEqual(["X-Header"]);
+      expect(document.getElementById("view-list")?.classList.contains("active")).toBe(true);
+    });
+  });
 });

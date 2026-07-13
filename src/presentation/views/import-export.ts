@@ -24,6 +24,10 @@ export function initImportExportView(handlers: ImportExportHandlers): void {
     "click",
     () => void saveFromEditor(handlers),
   );
+  byId<HTMLButtonElement>("btn-save-ie-header").addEventListener(
+    "click",
+    () => void saveFromEditor(handlers),
+  );
 }
 
 export function openImportExport(json: string): void {
