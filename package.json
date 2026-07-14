@@ -7,10 +7,13 @@
   "packageManager": "pnpm@10.34.0",
   "scripts": {
     "dev": "wxt",
+    "dev:edge": "wxt -b edge",
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
+    "build:edge": "wxt build -b edge",
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
+    "zip:edge": "wxt zip -b edge",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "lint": "oxlint src entrypoints tests",

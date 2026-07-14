@@ -1,6 +1,6 @@
 # Configurable Header Manager
 
-Modify HTTP request and response headers per URL pattern — for [Chrome](https://chromewebstore.google.com/detail/configurable-header-manag/ohiolpbohklmbigemlkoppafapnceoij?hl=en-GB&utm_source=ext_sidebar) and Firefox.  
+Modify HTTP request and response headers per URL pattern — for [Chrome](https://chromewebstore.google.com/detail/configurable-header-manag/ohiolpbohklmbigemlkoppafapnceoij?hl=en-GB&utm_source=ext_sidebar), Edge, and Firefox.  
 No external runtime dependencies. Vanilla TypeScript + WXT.
 
 **Features**
@@ -19,12 +19,14 @@ No external runtime dependencies. Vanilla TypeScript + WXT.
 ```bash
 pnpm install        # install + generate types
 pnpm dev            # Chrome (hot reload)
+pnpm dev:edge       # Edge (hot reload)
 pnpm dev:firefox    # Firefox (hot reload)
 ```
 
 Load unpacked in your browser:
 
 - **Chrome** → `chrome://extensions` → Enable Developer mode → *Load unpacked* → select `.output/chrome-mv3/`
+- **Edge** → `edge://extensions` → Enable Developer mode → *Load unpacked* → select `.output/edge-mv3/`
 - **Firefox** → `about:debugging` → *Load Temporary Add-on* → pick any file inside `.output/firefox-mv2/`
 
 ---
@@ -34,8 +36,9 @@ Load unpacked in your browser:
 | Command | What it does |
 |---|---|
 | `pnpm build` | Production build for Chrome |
+| `pnpm build:edge` | Production build for Edge |
 | `pnpm build:firefox` | Production build for Firefox |
-| `pnpm zip` / `pnpm zip:firefox` | Build + zip for store upload |
+| `pnpm zip` / `pnpm zip:edge` / `pnpm zip:firefox` | Build + zip for store upload |
 | `pnpm compile` | TypeScript type check |
 | `pnpm lint` / `pnpm lint:fix` | oxlint |
 | `pnpm fmt` / `pnpm fmt:check` | oxfmt formatter |
@@ -208,9 +211,9 @@ git tag v2.0.1
 git push --tags
 ```
 
-The release workflow (`.github/workflows/release.yml`) runs `pnpm check` and `pnpm test`, zips both
-targets, submits to both stores via WXT-native `pnpm wxt submit`, and creates a GitHub Release with
-the zips attached.
+The release workflow (`.github/workflows/release.yml`) runs `pnpm check` and `pnpm test`, zips all
+three targets, submits to the stores via WXT-native `pnpm wxt submit`, and creates a GitHub Release
+with the zips attached.
 
 **Required secrets** (add in *Settings → Secrets → Actions*):
 
@@ -220,9 +223,13 @@ the zips attached.
 | `CHROME_CLIENT_ID` | Google OAuth2 client ID |
 | `CHROME_CLIENT_SECRET` | Google OAuth2 client secret |
 | `CHROME_REFRESH_TOKEN` | Google OAuth2 refresh token |
+| `EDGE_PRODUCT_ID` | Edge Add-ons product ID |
+| `EDGE_CLIENT_ID` | Edge Partner Center API client ID |
+| `EDGE_API_KEY` | Edge Partner Center API key |
 | `FIREFOX_EXTENSION_ID` | Firefox add-on ID (must equal the published `header-manager@local`) |
 | `FIREFOX_JWT_ISSUER` | Firefox AMO API key |
 | `FIREFOX_JWT_SECRET` | Firefox AMO API secret |
 
 How to get Chrome credentials: [Chrome Web Store API guide](https://developer.chrome.com/docs/webstore/using-api)  
+How to get Edge credentials: [Edge Add-ons API guide](https://learn.microsoft.com/microsoft-edge/extensions-chromium/publish/api/using-addons-api)  
 How to get Firefox credentials: [AMO API keys](https://addons.mozilla.org/developers/addon/api/key/)

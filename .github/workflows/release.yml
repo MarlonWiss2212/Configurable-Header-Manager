@@ -33,6 +33,7 @@ jobs:
       - name: Zip extensions
         run: |
           pnpm zip
+          pnpm zip:edge
           pnpm zip:firefox
 
       # TODO: WXT-native submit — https://wxt.dev/guide/essentials/publishing.html
@@ -40,6 +41,7 @@ jobs:
 #        run: |
 #          pnpm wxt submit \
 #            --chrome-zip .output/*-chrome.zip \
+#            --edge-zip .output/*-edge.zip \
 #            --firefox-zip .output/*-firefox.zip \
 #            --firefox-sources-zip .output/*-sources.zip
 #        env:
@@ -47,6 +49,9 @@ jobs:
 #          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
 #          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
 #          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+#          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+#          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+#          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
 #          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
 #          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
 #          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
