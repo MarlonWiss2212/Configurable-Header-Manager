@@ -25,6 +25,7 @@ export class SaveRuleUseCase {
         headerValue: rule.headerValue,
         name: rule.name,
         comment: rule.comment,
+        color: rule.color,
       },
       target.folderId,
     );

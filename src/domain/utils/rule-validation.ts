@@ -30,5 +30,6 @@ export function normalizeRule(rule: Rule): Rule {
     headerValue: rule.operation === "remove" ? "" : rule.headerValue.trim(),
     name: optionalText(rule.name),
     comment: optionalText(rule.comment),
+    color: optionalText(rule.color),
   };
 }

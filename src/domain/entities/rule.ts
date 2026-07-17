@@ -16,6 +16,8 @@ export interface Rule {
   headerValue: string;
   name?: string;
   comment?: string;
+  /** Colour accent shown in the list. Display only — never affects matching. */
+  color?: string;
 }
 
 export interface RuleFolder {
@@ -24,6 +26,8 @@ export interface RuleFolder {
   rules: Rule[];
   /** Collapsed in the list view. Display only — part of the state so it persists. */
   collapsed?: boolean;
+  /** Colour accent shown in the list. Display only — never affects matching. */
+  color?: string;
 }
 
 export interface RuleState {

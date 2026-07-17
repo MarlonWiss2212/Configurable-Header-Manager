@@ -4,6 +4,8 @@ import { removeRuleFromCollections } from "@/src/domain/usecases/utils/remove-ru
 
 export class DeleteRuleUseCase {
   execute(state: RuleState, ruleId: number): RuleState {
-    return removeRuleFromCollections(cloneRuleState(state), ruleId);
+    const next = removeRuleFromCollections(cloneRuleState(state), ruleId);
+    // Deleting the last rule in a folder removes the (now-empty) folder.
+    return { ...next, folders: next.folders.filter((folder) => folder.rules.length > 0) };
   }
 }

@@ -11,6 +11,7 @@ export interface StateRepository {
   parseRules(text: string): RuleState;
   /** Serialize the state to its JSON exchange format for export. */
   serializeRules(state: RuleState): string;
-  /** Fetch and parse a hosted rules file. */
-  fetchRules(url: string): Promise<RuleState>;
+  /** Whether the extension is globally enabled. Missing/corrupt → true (enabled). */
+  loadGlobalEnabled(): Promise<boolean>;
+  saveGlobalEnabled(enabled: boolean): Promise<void>;
 }
