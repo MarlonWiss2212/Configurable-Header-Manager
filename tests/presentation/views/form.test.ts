@@ -16,6 +16,8 @@ const FORM_FIXTURE = `
   <input id="f-folder" type="text">
   <datalist id="folder-options"></datalist>
   <input id="f-comment" type="text">
+  <input type="radio" name="rule-color" value="" id="c-none" checked>
+  <input type="radio" name="rule-color" value="#ff3b30" id="c-red">
 `;
 
 const rule: Rule = {
@@ -28,6 +30,7 @@ const rule: Rule = {
   headerValue: "on",
   name: "Extra marker",
   comment: "adds marker",
+  color: "#ff3b30",
 };
 
 beforeEach(() => {
@@ -46,6 +49,7 @@ describe("form view", () => {
       name: "Extra marker",
       folderName: "Markers",
       comment: "adds marker",
+      color: "#ff3b30",
     });
   });
 

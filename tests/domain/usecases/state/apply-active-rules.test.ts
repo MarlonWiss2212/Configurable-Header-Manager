@@ -17,8 +17,14 @@ describe("ApplyActiveRulesUseCase", () => {
     const repository = mockStateRepository(state);
 
     await new ApplyActiveRulesUseCase(repository).execute(state);
+    expect(vi.mocked(repository.applyRules).mock.calls[0][0].map((r) => r.id)).toEqual([2]);
+  });
 
-    const applied = vi.mocked(repository.applyRules).mock.calls[0][0];
-    expect(applied.map((item) => item.id)).toEqual([2]);
+  it("applies no rules when the extension is globally disabled", async () => {
+    const repository = mockStateRepository(ruleState());
+    vi.mocked(repository.loadGlobalEnabled).mockResolvedValue(false);
+
+    await new ApplyActiveRulesUseCase(repository).execute(ruleState());
+    expect(vi.mocked(repository.applyRules).mock.calls[0][0]).toEqual([]);
   });
 });

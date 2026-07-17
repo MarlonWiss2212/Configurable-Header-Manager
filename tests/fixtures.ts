@@ -32,6 +32,7 @@ export function mockStateRepository(stored: RuleState): StateRepository {
     applyRules: vi.fn().mockResolvedValue(undefined),
     parseRules: vi.fn().mockReturnValue(stored),
     serializeRules: vi.fn().mockReturnValue("{json}"),
-    fetchRules: vi.fn().mockResolvedValue(stored),
+    loadGlobalEnabled: vi.fn().mockResolvedValue(true),
+    saveGlobalEnabled: vi.fn().mockResolvedValue(undefined),
   };
 }

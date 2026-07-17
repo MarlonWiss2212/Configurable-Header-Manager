@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { byId, checkRadio, escapeHtml, getRadioValue, showView } from "@/src/presentation/dom";
+import {
+  byId,
+  checkRadio,
+  escapeHtml,
+  getRadioValue,
+  safeColor,
+  showView,
+} from "@/src/presentation/dom";
 
 describe("DOM helpers", () => {
   it("escapes HTML", () => {
@@ -19,5 +26,13 @@ describe("DOM helpers", () => {
     expect(document.getElementById("b")?.classList.contains("active")).toBe(true);
     checkRadio("mode", "two");
     expect(getRadioValue("mode")).toBe("two");
+  });
+
+  it("accepts valid hex colours and rejects anything else", () => {
+    expect(safeColor("#fff")).toBe("#fff");
+    expect(safeColor("#ff3b30")).toBe("#ff3b30");
+    expect(safeColor("red")).toBe("");
+    expect(safeColor('#fff"><script>')).toBe("");
+    expect(safeColor(undefined)).toBe("");
   });
 });

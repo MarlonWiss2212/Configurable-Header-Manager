@@ -23,4 +23,14 @@ describe("BrowserRuleStorageDataSource", () => {
     await dataSource.saveState(state);
     expect(await dataSource.loadRawState()).toEqual(state);
   });
+
+  it("returns null for global-enabled when nothing is stored", async () => {
+    expect(await new BrowserRuleStorageDataSource().loadRawGlobalEnabled()).toBeNull();
+  });
+
+  it("round-trips the global-enabled flag", async () => {
+    const dataSource = new BrowserRuleStorageDataSource();
+    await dataSource.saveGlobalEnabled(false);
+    expect(await dataSource.loadRawGlobalEnabled()).toBe(false);
+  });
 });

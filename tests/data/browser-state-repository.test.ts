@@ -47,10 +47,18 @@ describe("loadState / saveState", () => {
   });
 
   it("returns an empty state when storage is empty or corrupt", async () => {
-    expect(await repository().loadState()).toEqual({ schemaVersion: 2, folders: [], rules: [] });
+    expect(await repository().loadState()).toEqual({
+      schemaVersion: 2,
+      folders: [],
+      rules: [],
+    });
 
     await browser.storage.local.set({ ruleState: { schemaVersion: 99 } });
-    expect(await repository().loadState()).toEqual({ schemaVersion: 2, folders: [], rules: [] });
+    expect(await repository().loadState()).toEqual({
+      schemaVersion: 2,
+      folders: [],
+      rules: [],
+    });
   });
 });
 
@@ -64,34 +72,32 @@ describe("parseRules / serializeRules", () => {
     expect(() => repository().parseRules("{nope")).toThrow(DataError);
     expect(() => repository().parseRules("{nope")).toThrow("Invalid JSON");
   });
+
+  it("round-trips rule and folder colours", () => {
+    const repo = repository();
+    const colored: RuleState = {
+      schemaVersion: 2,
+      folders: [{ id: "staging", name: "Staging", color: "#ff3b30", rules: [rule({ id: 1 })] }],
+      rules: [rule({ id: 2, color: "#007aff" })],
+    };
+    const restored = repo.parseRules(repo.serializeRules(colored));
+    expect(restored.folders[0].color).toBe("#ff3b30");
+    expect(restored.rules[0].color).toBe("#007aff");
+  });
 });
 
-describe("fetchRules", () => {
-  it("rejects malformed URLs and unsupported protocols without fetching", async () => {
-    await expect(repository().fetchRules("not a url")).rejects.toThrow("Invalid URL");
-    await expect(repository().fetchRules("ftp://x.test/rules.json")).rejects.toThrow(
-      "Only http:// and https://",
-    );
+describe("global enabled", () => {
+  it("defaults to enabled when nothing is stored", async () => {
+    expect(await repository().loadGlobalEnabled()).toBe(true);
   });
 
-  it("fetches and migrates a hosted rules file", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ schemaVersion: 2, folders: [], rules: [{ headerName: "X-R" }] }),
-      }),
-    );
-    const fetched = await repository().fetchRules("https://x.test/rules.json");
-    expect(fetched.rules[0].headerName).toBe("X-R");
-  });
+  it("round-trips the flag and treats only an explicit false as disabled", async () => {
+    const repo = repository();
+    await repo.saveGlobalEnabled(false);
+    expect(await repo.loadGlobalEnabled()).toBe(false);
 
-  it("throws on a non-OK response", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({ ok: false, status: 404, statusText: "Not Found" }),
-    );
-    await expect(repository().fetchRules("https://x.test/rules.json")).rejects.toThrow("404");
+    await repo.saveGlobalEnabled(true);
+    expect(await repo.loadGlobalEnabled()).toBe(true);
   });
 });
 
