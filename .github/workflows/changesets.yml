@@ -28,10 +28,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Quality gates
+        run: |
+          pnpm check
+          pnpm test
+
       - name: Create Version Packages PR
         uses: changesets/action@v1
         with:
-          version: pnpm version
+          version: pnpm run version
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
