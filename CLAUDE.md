@@ -98,8 +98,18 @@ these three sections — include only the ones that apply, in this order:
 - Deleted things.
 ```
 
+## CI / versioning workflows
+
+- **`ci.yml`** runs `pnpm check` + `pnpm test` on pull requests and non-`main` branch pushes —
+  never on `main`, so a merge doesn't re-run what the PR already checked.
+- **`changesets.yml`** runs on push to `main`: `pnpm run version` (i.e. `changeset version`)
+  consumes any pending changesets, bumps `package.json`, writes `CHANGELOG.md`, and commits the
+  result straight back to `main` (`chore: version packages [skip ci]` — no "Version Packages" PR,
+  and the commit doesn't re-trigger CI). If there are no changesets it's a no-op.
+
 ## Release
 
-Bump `package.json` version (single source of truth — the manifest inherits it), then push a
-`v*` tag. `.github/workflows/release.yml` runs check + test, zips both targets, submits via
-`pnpm wxt submit`, and creates a GitHub Release.
+The version in `package.json` is bumped automatically by `changesets.yml` when changesets land on
+`main` (single source of truth — the manifest inherits it). To publish, push a `v*` tag matching
+that version. `.github/workflows/release.yml` runs check + test, zips both targets, and creates a
+GitHub Release whose notes are the latest `CHANGELOG.md` section (the first `## ` block).

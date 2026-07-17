@@ -27,6 +27,7 @@ has its own test at the mirrored path.
   `test: …`, `docs: …`). Don't bundle a whole feature into one commit.
 - Run `pnpm check` and `pnpm test` locally before opening a PR.
 - **Add a changeset** for any user-facing change: `pnpm changeset`, then commit the generated
-  file. This drives the version bump and `CHANGELOG.md`. Structure the body with `## Added` /
-  `## Changed` / `## Removed` sections — see the Changesets section in [`CLAUDE.md`](./CLAUDE.md).
+  file. On merge to `main` this automatically bumps the version and updates `CHANGELOG.md`.
+  Structure the body with `## Added` / `## Changed` / `## Removed` sections — see the Changesets
+  section in [`CLAUDE.md`](./CLAUDE.md).
 - Version numbers and tags are the maintainer's decision — don't bump the version or add tags.

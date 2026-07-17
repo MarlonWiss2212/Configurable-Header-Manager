@@ -119,8 +119,8 @@ docs/
 └── example-rules.json   Ready-to-use example
 
 .github/workflows/
-├── ci.yml                check + test on pushes/PRs (skipped on the no-ci label)
-├── changesets.yml        Opens a "Version Packages" PR on merge to main
+├── ci.yml                check + test on PRs / non-main pushes (skipped on the no-ci label)
+├── changesets.yml        Versions + commits the bump straight to main on merge
 └── release.yml           Check + test + zip + GitHub Release on a v* tag
 ```
 
@@ -208,7 +208,8 @@ git push --tags
 ```
 
 The release workflow (`.github/workflows/release.yml`) runs `pnpm check` and `pnpm test`, zips all
-three targets, and creates a GitHub Release with the zips attached. Automatic store submission via
+three targets, and creates a GitHub Release with the zips attached and the latest `CHANGELOG.md`
+section as the release notes. Automatic store submission via
 WXT-native `pnpm wxt submit` is scaffolded but currently disabled (commented out with a TODO); when
 enabled it will need the secrets below.
 
