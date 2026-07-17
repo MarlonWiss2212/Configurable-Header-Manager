@@ -1,5 +1,5 @@
-import type { Rule, RuleOperation } from "@/src/domain/entities/rule";
-import { escapeHtml } from "@/src/presentation/dom";
+import type { Rule } from "@/src/domain/entities/rule";
+import { escapeHtml, safeColor } from "@/src/presentation/dom";
 import { icon } from "@/src/presentation/icons/icons";
 import { moveButton } from "@/src/presentation/components/move-button";
 import { toggleHtml } from "@/src/presentation/components/toggle";
@@ -10,18 +10,29 @@ export function ruleRow(
   index: number,
   count: number,
   inFolder: boolean,
+  folderColor?: string,
 ): string {
   const title = rule.name ? escapeHtml(rule.name) : escapeHtml(rule.headerName);
   const folderAttr = folderId === null ? "" : ` data-folder-id="${escapeHtml(folderId)}"`;
   const moveAttrs = `data-id="${rule.id}"${folderAttr}`;
+  // A rule with no colour of its own inherits its folder's colour.
+  const color = safeColor(rule.color) || safeColor(folderColor);
+  const lastInFolder = inFolder && index === count - 1;
+  const classes = `rule-row${rule.enabled ? "" : " rule-disabled"}${inFolder ? " in-folder" : ""}${
+    lastInFolder ? " in-folder-last" : ""
+  }${color ? " has-accent" : ""}`;
+  const styleAttr = color ? ` style="--accent: ${color}"` : "";
 
   return `
-    <li class="rule-row${rule.enabled ? "" : " rule-disabled"}${inFolder ? " in-folder" : ""}" data-id="${rule.id}">
+    <li class="${classes}"${styleAttr} data-id="${rule.id}">
       ${ruleToggle(rule, title)}
       <div class="rule-info">${ruleInfo(rule, title)}</div>
       <div class="rule-actions">
         ${moveButton("rule", "up", index === 0, moveAttrs)}
         ${moveButton("rule", "down", index === count - 1, moveAttrs)}
+        <button class="icon-btn dup-btn" data-id="${rule.id}" title="Duplicate" aria-label="Duplicate ${title}">
+          ${icon("duplicate")}
+        </button>
         <button class="icon-btn edit-btn" data-id="${rule.id}" title="Edit" aria-label="Edit ${title}">
           ${icon("edit")}
         </button>
@@ -47,10 +58,8 @@ function ruleInfo(rule: Rule, title: string): string {
 
   let info = `
     <div class="rule-main">
-      <span class="badge ${rule.type === "response" ? "badge-res" : "badge-req"}">
-        ${rule.type === "response" ? "RES" : "REQ"}
-      </span>
-      <span class="badge ${operationBadgeClass(rule.operation)}">${rule.operation.toUpperCase()}</span>
+      <span class="badge">${rule.type === "response" ? "RES" : "REQ"}</span>
+      <span class="badge">${rule.operation.toUpperCase()}</span>
       <span class="rule-name">${title}</span>
       ${!rule.name && headerValue ? `<span class="rule-sep">:</span><span class="rule-val">${headerValue}</span>` : ""}
     </div>`;
@@ -60,10 +69,4 @@ function ruleInfo(rule: Rule, title: string): string {
   info += `<div class="rule-url">${escapeHtml(rule.urlPattern.trim() || "*")}</div>`;
   if (rule.comment) info += `<div class="rule-comment">${escapeHtml(rule.comment)}</div>`;
   return info;
-}
-
-function operationBadgeClass(operation: RuleOperation): string {
-  if (operation === "remove") return "badge-remove";
-  if (operation === "append") return "badge-append";
-  return "badge-set";
 }

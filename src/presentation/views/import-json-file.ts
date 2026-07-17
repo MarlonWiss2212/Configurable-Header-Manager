@@ -9,7 +9,7 @@ interface JsonFileImportHandlers {
 export function initJsonFileImport(handlers: JsonFileImportHandlers): void {
   // Firefox closes a browser-action popup as soon as a file picker opens
   // (Bugzilla #1292701), so file import cannot work there — hide the section.
-  // Pasting JSON and fetching from a URL remain available.
+  // Pasting JSON into the editor remains available.
   if (import.meta.env.FIREFOX) {
     byId<HTMLElement>("json-import-section").hidden = true;
     return;

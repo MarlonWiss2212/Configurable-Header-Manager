@@ -39,7 +39,10 @@ export function initFormView(handlers: FormHandlers): void {
     .forEach((radio) => radio.addEventListener("change", updateValueRow));
 
   const headerNameInput = byId<HTMLInputElement>("f-name");
-  headerNameInput.addEventListener("input", () => headerNameInput.classList.remove("input-error"));
+  headerNameInput.addEventListener("input", () => {
+    headerNameInput.classList.remove("input-error");
+    headerNameInput.removeAttribute("aria-invalid");
+  });
 
   byId<HTMLFormElement>("rule-form").addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && (event.target as HTMLElement).tagName !== "TEXTAREA") {
@@ -63,6 +66,7 @@ export function populateForm(editable: EditableRule, folders: FolderOption[] = [
   const headerNameInput = byId<HTMLInputElement>("f-name");
   headerNameInput.value = rule?.headerName ?? "";
   headerNameInput.classList.remove("input-error");
+  headerNameInput.removeAttribute("aria-invalid");
 
   byId<HTMLInputElement>("f-url").value = rule?.urlPattern ?? "";
   byId<HTMLInputElement>("f-value").value = rule?.headerValue ?? "";
@@ -76,6 +80,7 @@ export function populateForm(editable: EditableRule, folders: FolderOption[] = [
 
   checkRadio("rule-type", rule?.type ?? "request");
   checkRadio("rule-op", rule?.operation ?? "set");
+  checkRadio("rule-color", rule?.color ?? "");
   updateOperationOptions();
   updateValueRow();
 }
@@ -86,6 +91,7 @@ export function readFormValues(): RuleFormValues | null {
 
   if (!headerName) {
     headerNameInput.classList.add("input-error");
+    headerNameInput.setAttribute("aria-invalid", "true");
     headerNameInput.focus();
     return null;
   }
@@ -100,6 +106,7 @@ export function readFormValues(): RuleFormValues | null {
     name: optionalText(byId<HTMLInputElement>("f-rule-name").value),
     folderName: optionalText(byId<HTMLInputElement>("f-folder").value),
     comment: optionalText(byId<HTMLInputElement>("f-comment").value),
+    color: optionalText(getRadioValue("rule-color")),
   };
 }
 

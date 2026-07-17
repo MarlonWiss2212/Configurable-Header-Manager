@@ -1,10 +1,35 @@
-import type { RuleState } from "@/src/domain/entities/rule";
+import type { Rule, RuleState } from "@/src/domain/entities/rule";
 import { enabledRules, flattenRules } from "@/src/domain/utils/rule-state";
 import type { ListCallbacks } from "@/src/presentation/types/view-contracts";
 import { setHtml } from "@/src/presentation/dom";
 import { emptyState } from "@/src/presentation/components/empty-state";
 import { folderRow } from "@/src/presentation/components/folder-row";
 import { ruleRow } from "@/src/presentation/components/rule-row";
+
+function ruleMatches(rule: Rule, query: string): boolean {
+  return [rule.name, rule.headerName, rule.headerValue, rule.urlPattern, rule.comment].some(
+    (field) => field?.toLowerCase().includes(query),
+  );
+}
+
+/** Display-only filter: keeps rules matching the query, and folders whose name matches
+ *  (with all their rules) or that contain a matching rule. */
+export function filterRuleState(state: RuleState, rawQuery: string): RuleState {
+  const query = rawQuery.trim().toLowerCase();
+  if (!query) return state;
+
+  return {
+    ...state,
+    folders: state.folders
+      .map((folder) =>
+        folder.name.toLowerCase().includes(query)
+          ? folder
+          : { ...folder, rules: folder.rules.filter((rule) => ruleMatches(rule, query)) },
+      )
+      .filter((folder) => folder.rules.length > 0 || folder.name.toLowerCase().includes(query)),
+    rules: state.rules.filter((rule) => ruleMatches(rule, query)),
+  };
+}
 
 export function renderList(
   container: HTMLElement,
@@ -24,7 +49,7 @@ export function renderList(
         ? ""
         : folder.rules
             .map((rule, ruleIndex) =>
-              ruleRow(rule, folder.id, ruleIndex, folder.rules.length, true),
+              ruleRow(rule, folder.id, ruleIndex, folder.rules.length, true, folder.color),
             )
             .join("");
       return folderRow(folder, folderIndex, state.folders.length) + members;
@@ -56,6 +81,12 @@ export function renderList(
       });
     }
 
+    const colorButton = row.querySelector<HTMLButtonElement>(".folder-color-btn");
+    colorButton?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      callbacks.onPickFolderColor(folderId, colorButton.dataset.color ?? "");
+    });
+
     row.addEventListener("click", (event) => {
       if ((event.target as HTMLElement).closest(".toggle, .folder-actions")) return;
       callbacks.onToggleCollapse(folderId);
@@ -69,6 +100,9 @@ export function renderList(
 
   container.querySelectorAll<HTMLButtonElement>(".edit-btn").forEach((button) => {
     button.addEventListener("click", () => callbacks.onEdit(Number(button.dataset.id)));
+  });
+  container.querySelectorAll<HTMLButtonElement>(".dup-btn").forEach((button) => {
+    button.addEventListener("click", () => callbacks.onDuplicate(Number(button.dataset.id)));
   });
   container.querySelectorAll<HTMLButtonElement>(".del-btn").forEach((button) => {
     button.addEventListener("click", () => callbacks.onDelete(Number(button.dataset.id)));

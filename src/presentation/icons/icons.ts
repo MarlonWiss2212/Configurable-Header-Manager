@@ -6,6 +6,7 @@ export type IconName =
   | "chevron"
   | "delete"
   | "download"
+  | "duplicate"
   | "edit"
   | "folder"
   | "pulse"

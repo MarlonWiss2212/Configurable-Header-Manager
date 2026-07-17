@@ -1,17 +1,12 @@
-import type { ImportExportHandlers } from "@/src/presentation/types/view-contracts";
-import { byId, downloadFile, showView } from "@/src/presentation/dom";
+import type { ImportExportHandlers, ImportMode } from "@/src/presentation/types/view-contracts";
+import { byId, downloadFile, getRadioValue, showView } from "@/src/presentation/dom";
 import { initJsonFileImport, resetJsonFileImport } from "@/src/presentation/views/import-json-file";
+
+// The current configuration JSON, shown in the editor in Replace mode.
+let currentJson = "";
 
 export function initImportExportView(handlers: ImportExportHandlers): void {
   byId<HTMLButtonElement>("btn-back-ie").addEventListener("click", handlers.onCancel);
-  byId<HTMLButtonElement>("btn-cancel-ie").addEventListener("click", handlers.onCancel);
-  byId<HTMLButtonElement>("btn-fetch-url").addEventListener(
-    "click",
-    () => void fetchIntoEditor(handlers),
-  );
-  byId<HTMLInputElement>("url-input").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") void fetchIntoEditor(handlers);
-  });
   initJsonFileImport({
     readJsonFile: handlers.readJsonFile,
     onLoaded: setEditorJson,
@@ -24,41 +19,30 @@ export function initImportExportView(handlers: ImportExportHandlers): void {
     "click",
     () => void saveFromEditor(handlers),
   );
-  byId<HTMLButtonElement>("btn-save-ie-header").addEventListener(
-    "click",
-    () => void saveFromEditor(handlers),
-  );
+  // Replace shows the full current config to edit; Merge starts empty to paste additions into.
+  document
+    .querySelectorAll<HTMLInputElement>('input[name="import-mode"]')
+    .forEach((radio) => radio.addEventListener("change", syncEditorToMode));
 }
 
 export function openImportExport(json: string): void {
-  setEditorJson(json);
+  currentJson = json;
   resetJsonFileImport();
   clearError();
+  syncEditorToMode();
   showView("view-ie");
 }
 
-async function fetchIntoEditor(handlers: ImportExportHandlers): Promise<void> {
-  const url = byId<HTMLInputElement>("url-input").value.trim();
-  const fetchButton = byId<HTMLButtonElement>("btn-fetch-url");
-  clearError();
-
-  try {
-    fetchButton.disabled = true;
-    fetchButton.textContent = "Fetching...";
-    setEditorJson(await handlers.fetchJsonFromUrl(url));
-    byId<HTMLInputElement>("url-input").value = "";
-  } catch (error) {
-    showError(error instanceof Error ? error.message : "Fetch failed - check the URL and CORS.");
-  } finally {
-    fetchButton.disabled = false;
-    fetchButton.textContent = "Fetch";
-  }
+function syncEditorToMode(): void {
+  const mode = (getRadioValue("import-mode") || "merge") as ImportMode;
+  setEditorJson(mode === "replace" ? currentJson : "");
 }
 
 async function saveFromEditor(handlers: ImportExportHandlers): Promise<void> {
+  const mode = (getRadioValue("import-mode") || "merge") as ImportMode;
   clearError();
   try {
-    await handlers.onSave(byId<HTMLTextAreaElement>("json-area").value);
+    await handlers.onSave(byId<HTMLTextAreaElement>("json-area").value, mode);
   } catch (error) {
     showError(error instanceof Error ? error.message : "Invalid JSON");
   }

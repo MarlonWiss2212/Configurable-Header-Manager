@@ -19,17 +19,21 @@ export interface ListCallbacks {
   onToggleRule: (id: number, enabled: boolean) => void;
   onToggleFolder: (folderId: string, enabled: boolean) => void;
   onToggleCollapse: (folderId: string) => void;
+  onPickFolderColor: (folderId: string, currentColor: string) => void;
   onEdit: (id: number) => void;
+  onDuplicate: (id: number) => void;
   onDelete: (id: number) => void;
   onMoveFolder: (folderId: string, direction: MoveDirection) => void;
   onMoveRule: (folderId: RuleContainerId, id: number, direction: MoveDirection) => void;
 }
 
+export type ImportMode = "merge" | "replace";
+
 export interface ImportExportHandlers {
-  onSave: (jsonText: string) => Promise<void> | void;
+  /** Import pasted/loaded JSON: merge into current or replace all. */
+  onSave: (jsonText: string, mode: ImportMode) => Promise<void> | void;
   onCancel: () => void;
   getJson: () => string;
-  fetchJsonFromUrl: (url: string) => Promise<string>;
   readJsonFile: (file: File) => Promise<string>;
 }
 
