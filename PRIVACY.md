@@ -41,9 +41,9 @@ The extension ships with no third-party libraries, no remote scripts, and no CDN
 
 ---
 
-## No autonomous network requests
+## No network requests
 
-The only outbound request the extension can make is an **opt-in, user-initiated** JSON fetch on the Import / Export screen — when the user explicitly pastes a URL and clicks Fetch. This feature is controlled entirely by the user. The extension never fetches anything on its own.
+The extension makes **no network requests of any kind**. Importing and exporting rules is entirely local — you drop or choose a `.json` file, paste JSON, or download the current configuration. Nothing is ever fetched or sent.
 
 ---
 

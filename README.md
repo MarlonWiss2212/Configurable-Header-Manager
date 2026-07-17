@@ -6,11 +6,12 @@ No external runtime dependencies. Vanilla TypeScript + WXT.
 **Features**
 
 - Set, remove, or append headers on requests and responses, filtered by URL pattern
-- Group rules into folders — toggle, collapse, and reorder them as a unit
-- Optional display name and comment per rule (never sent with requests)
-- Import / export as plain JSON: paste, drop a file, or fetch from a URL
+- Global on/off toggle, live search, and one-click rule duplication
+- Group rules into folders — enable/disable, collapse, reorder, and colour them as a unit
+- Optional colour accent, display name, and comment per rule (never sent with requests)
+- Import / export as plain JSON: paste or drop a file, merge or replace
 - Rules are applied by the browser's own declarativeNetRequest engine — the extension
-  never reads your traffic ([privacy](PRIVACY.md))
+  never reads your traffic and makes no network requests ([privacy](PRIVACY.md))
 
 ---
 
@@ -59,11 +60,11 @@ The domain layer never imports browser APIs, DOM APIs, storage, fetch, or WXT.
 │  Popup views, components, DOM helpers, app    │
 │  Calls domain use cases only                  │
 ├──────────────────── data ────────────────────┤
-│  Storage, fetch, DNR, mappers, migrations     │
-│  Implements domain repository + gateways      │
+│  Storage, DNR, mappers, migrations            │
+│  Implements the domain repository contracts   │
 ├─────────────────── domain ───────────────────┤
 │  Entities (data + invariants), use cases,     │
-│  repository + gateway contracts               │
+│  repository + migration contracts             │
 └────────────────────────────────────────────────┘
 ```
 
@@ -86,13 +87,13 @@ src/
 │   ├── utils/            Shared pure functions (validation, ids, state ops)
 │   ├── repositories/     Contracts: StateRepository, MigrationRepository
 │   └── usecases/         One class per app action, `execute()` each
-│       ├── rules/        save, upsert, delete, toggle, move
-│       ├── folders/      toggle, move, toggle-collapse
-│       ├── state/        load, commit, apply-active
-│       ├── transfer/     import, export, fetch-remote
+│       ├── rules/        save, upsert, delete, duplicate, toggle, move
+│       ├── folders/      toggle, move, toggle-collapse, set-colour
+│       ├── state/        load, save, apply-active, global-enabled
+│       ├── transfer/     import, export, merge
 │       └── utils/        Helpers shared between use cases
 ├── data/                 Infrastructure — implements the domain contracts
-│   ├── datasources/      Dumb I/O: browser.storage, DNR calls, fetch
+│   ├── datasources/      Dumb I/O: browser.storage, DNR calls
 │   ├── mappers/          Model ↔ entity, entity → DNR rule
 │   ├── models/           DTOs: persisted rules JSON, DNR rule shape
 │   ├── repositories/     BrowserStateRepository, RuleMigrationRepository
@@ -102,14 +103,14 @@ src/
     ├── components/       Small HTML helpers
     ├── icons/            SVG asset helpers
     ├── types/            View contracts
-    └── views/            List, form, import/export views
+    └── views/            List, form, import/export, folder-colour dialog
 
 tests/                    Vitest suite, mirrors src/ layer by layer
 
 entrypoints/
-├── background.ts         Service worker — applies rules on install
+├── background.ts         Service worker — applies rules on install + startup
 └── popup/
-    ├── index.html        Popup markup (all three views)
+    ├── index.html        Popup markup (all views)
     ├── main.ts           Entry point — 3 lines
     └── style.css         Light + dark theme, no framework
 
@@ -118,7 +119,9 @@ docs/
 └── example-rules.json   Ready-to-use example
 
 .github/workflows/
-└── release.yml           Check + test + publish to both stores on a v* tag
+├── ci.yml                check + test on pushes/PRs (skipped on the no-ci label)
+├── changesets.yml        Opens a "Version Packages" PR on merge to main
+└── release.yml           Check + test + zip + GitHub Release on a v* tag
 ```
 
 ---
@@ -173,17 +176,10 @@ Full schema and examples: [`docs/rule-format.md`](docs/rule-format.md)
 
 ## Importing rules
 
-Open **Import / Export** to paste JSON, import from a `.json` file, or fetch a hosted JSON file.
-All import paths load JSON into the editor for review before you apply it.
-
-The URL must be reachable from the browser and the server must allow cross-origin requests:
-
-```
-Access-Control-Allow-Origin: *
-Content-Type: application/json
-```
-
-Good hosts: GitHub raw URLs, S3 public buckets, any static CDN.
+Open **Import / Export**. Choose a mode — **Merge** (add to your rules) or **Replace** (overwrite
+everything) — then drop/choose a `.json` file or paste JSON into the editor and click **Import**.
+Use **Download** to export your current configuration. Everything is local; the extension makes no
+network requests.
 
 ---
 
@@ -212,10 +208,11 @@ git push --tags
 ```
 
 The release workflow (`.github/workflows/release.yml`) runs `pnpm check` and `pnpm test`, zips all
-three targets, submits to the stores via WXT-native `pnpm wxt submit`, and creates a GitHub Release
-with the zips attached.
+three targets, and creates a GitHub Release with the zips attached. Automatic store submission via
+WXT-native `pnpm wxt submit` is scaffolded but currently disabled (commented out with a TODO); when
+enabled it will need the secrets below.
 
-**Required secrets** (add in *Settings → Secrets → Actions*):
+**Store-submission secrets** (needed only once submission is enabled; add in *Settings → Secrets → Actions*):
 
 | Secret | Purpose |
 |---|---|

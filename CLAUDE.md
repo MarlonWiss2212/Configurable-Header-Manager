@@ -52,8 +52,11 @@ Dependencies point inward: `presentation → domain ← data`. The rules:
 
 ## Hard constraints
 
-- **Schema v2 only** (`{ schemaVersion: 2, folders: [], rules: [] }`). v1 (flat rule list with
-  a `folder` string field) was deliberately dropped — do not re-add migration for it.
+- **Schema is v2** (`{ schemaVersion: 2, folders: [], rules: [] }`). v1 (flat rule list with a
+  `folder` string field) was deliberately dropped — do not re-add migration for it. Rules and
+  folders carry an optional display-only `color`.
+- Rules and folders can be imported/exported as JSON (file, drop, or paste) with a Merge or
+  Replace mode. There is no remote/URL fetching — the extension makes no network requests.
 - `folder.collapsed` is part of the rule state (persisted, display-only). Collapse toggles go
   through `SaveRuleStateUseCase` (persist only), NOT the full commit — re-applying DNR rules
   for a display change is wasted work.
@@ -62,18 +65,38 @@ Dependencies point inward: `presentation → domain ← data`. The rules:
   `data_collection_permissions`.
 - **Firefox popup cannot host a file picker** (Bugzilla #1292701 — the popup closes when the
   picker opens). The JSON file-import section is therefore hidden on Firefox
-  (`import.meta.env.FIREFOX` in `import-json-file.ts`); paste + URL fetch remain. Do not
-  re-enable the dropzone there or "fix" it by opening tabs — the user rejected that.
+  (`import.meta.env.FIREFOX` in `import-json-file.ts`); pasting JSON into the editor remains. Do
+  not re-enable the dropzone there or "fix" it by opening tabs — the user rejected that.
 - No direct `.innerHTML =` assignments in `src/` — use `setHtml()` from `presentation/dom.ts`
   (addons-linter flags innerHTML sinks). Always escape user content with `escapeHtml()`.
-- Rule/folder display fields (`name`, `comment`, `collapsed`) never affect matching and are
-  never sent with requests — keep it that way and keep the docs saying so.
+- Rule/folder display fields (`name`, `comment`, `collapsed`, `color`) never affect matching and
+  are never sent with requests — keep it that way and keep the docs saying so.
 
 ## Git conventions
 
 - **Small, per-directory commits** — one commit per layer/concern (e.g. `feat(domain): …`,
   `test: …`, `docs: …`). Never bundle a whole feature into one commit.
 - Version numbers and tags are the user's decision — never bump or tag without being asked.
+
+## Changesets
+
+Any user-facing change gets a changeset (`pnpm changeset`). Structure the changeset body with
+these three sections — include only the ones that apply, in this order:
+
+```markdown
+---
+"configurable-header-manager": minor
+---
+
+## Added
+- New capabilities.
+
+## Changed
+- Modified behaviour.
+
+## Removed
+- Deleted things.
+```
 
 ## Release
 
