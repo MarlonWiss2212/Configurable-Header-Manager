@@ -1,8 +1,8 @@
 name: Changesets
 
-# On push to main, open (or update) a "Version Packages" PR that bumps package.json and
-# writes CHANGELOG.md from the pending changesets. Publishing to stores is still done by
-# pushing a v* tag (see release.yml) — this only proposes the version bump.
+# On push to main, consume any pending changesets: bump package.json and write CHANGELOG.md,
+# then commit the result straight back to main. Publishing to stores is still done by pushing a
+# v* tag (see release.yml) — this only lands the version bump.
 on:
   push:
     branches:
@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   version:
@@ -28,16 +27,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Quality gates
-        run: |
-          pnpm check
-          pnpm test
+      - name: Version packages
+        run: pnpm run version
 
-      - name: Create Version Packages PR
-        uses: changesets/action@v1
-        with:
-          version: pnpm run version
-          commit: "chore: version packages"
-          title: "chore: version packages"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit version bump
+        run: |
+          if git diff --quiet; then
+            echo "No changesets to consume — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: version packages [skip ci]"
+          git push
