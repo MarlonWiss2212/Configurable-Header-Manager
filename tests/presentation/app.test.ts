@@ -87,6 +87,18 @@ describe("popup app (composition root)", () => {
     });
   });
 
+  it("blocks saving a rule with an invalid header name", async () => {
+    document.getElementById("btn-add")?.click();
+    const nameInput = document.getElementById("f-name") as HTMLInputElement;
+    nameInput.value = "bad header";
+    document.getElementById("btn-save")?.click();
+
+    await vi.waitFor(() => {
+      expect(nameInput.classList.contains("input-error")).toBe(true);
+      expect(document.getElementById("view-form")?.classList.contains("active")).toBe(true);
+    });
+  });
+
   it("sets a folder colour through the colour dialog", async () => {
     document.querySelector<HTMLButtonElement>(".folder-color-btn")?.click();
     expect(document.getElementById("folder-color-dialog")?.hidden).toBe(false);

@@ -9,6 +9,8 @@ import { slugifyFolderName, uniqueFolderId } from "@/src/domain/utils/folder-id"
 import {
   isRuleOperation,
   isRuleType,
+  isValidHeaderName,
+  isValidHeaderValue,
   normalizeRule,
   optionalText,
 } from "@/src/domain/utils/rule-validation";
@@ -57,7 +59,10 @@ export class RuleStateMapper {
   private toRule(model: RuleModel, id: number): Rule | null {
     if (!isRecord(model)) return null;
     const headerName = typeof model.headerName === "string" ? model.headerName.trim() : "";
-    if (!headerName) return null;
+    if (!headerName || !isValidHeaderName(headerName)) return null;
+
+    const headerValue = String(model.headerValue ?? "");
+    if (!isValidHeaderValue(headerValue)) return null;
 
     return normalizeRule({
       id,
@@ -66,7 +71,7 @@ export class RuleStateMapper {
       type: isRuleType(model.type) ? model.type : "request",
       operation: isRuleOperation(model.operation) ? model.operation : "set",
       headerName,
-      headerValue: String(model.headerValue ?? ""),
+      headerValue,
       name: optionalText(model.name),
       comment: optionalText(model.comment),
       color: optionalText(model.color),

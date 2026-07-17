@@ -11,6 +11,7 @@ import {
 describe("DOM helpers", () => {
   it("escapes HTML", () => {
     expect(escapeHtml(`<b>"x"</b>`)).toBe("&lt;b&gt;&quot;x&quot;&lt;/b&gt;");
+    expect(escapeHtml(`it's a 'test'`)).toBe("it&#39;s a &#39;test&#39;");
   });
 
   it("finds elements and toggles views/radios", () => {

@@ -14,6 +14,21 @@ export function isRuleOperation(value: unknown): value is RuleOperation {
   return typeof value === "string" && (RULE_OPERATIONS as readonly string[]).includes(value);
 }
 
+const HEADER_NAME = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+// oxlint-disable-next-line no-control-regex -- intentionally matching control chars to reject them
+const HEADER_VALUE_CONTROL = /[\x00-\x1f\x7f]/;
+
+/** RFC 7230 token — a header name may only contain these characters. */
+export function isValidHeaderName(name: string): boolean {
+  return HEADER_NAME.test(name);
+}
+
+/** A header value may not contain control characters (notably CR/LF, which would let a
+ *  crafted value inject additional headers). Empty is allowed (e.g. the `remove` operation). */
+export function isValidHeaderValue(value: string): boolean {
+  return !HEADER_VALUE_CONTROL.test(value);
+}
+
 export function optionalText(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   return value.trim() || undefined;

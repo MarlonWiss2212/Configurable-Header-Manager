@@ -34,10 +34,18 @@ export class BrowserStateRepository implements StateRepository {
 
   async applyRules(rules: Rule[]): Promise<void> {
     const removeRuleIds = await this.dnr.getDynamicRuleIds();
-    await this.dnr.replaceDynamicRules(
-      removeRuleIds,
-      rules.map((rule) => this.dnrMapper.toDynamicRule(rule)),
-    );
+    try {
+      await this.dnr.replaceDynamicRules(
+        removeRuleIds,
+        rules.map((rule) => this.dnrMapper.toDynamicRule(rule)),
+      );
+    } catch (error) {
+      // A single malformed rule (or exceeding the dynamic-rule limit) makes the browser reject
+      // the whole batch; swallow so it can't leave the extension silently broken. Rules are
+      // validated before this point, so this is a backstop only.
+      // oxlint-disable-next-line no-console -- background error, no UI to surface it
+      console.error("Failed to apply declarativeNetRequest rules", error);
+    }
   }
 
   parseRules(text: string): RuleState {

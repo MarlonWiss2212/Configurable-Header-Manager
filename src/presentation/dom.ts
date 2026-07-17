@@ -11,7 +11,8 @@ export function escapeHtml(value: unknown): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 /** Replace children by parsing HTML in an inert document — avoids direct innerHTML sinks. */

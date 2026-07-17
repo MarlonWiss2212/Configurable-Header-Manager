@@ -1,5 +1,5 @@
 import type { Rule } from "@/src/domain/entities/rule";
-import { optionalText } from "@/src/domain/utils/rule-validation";
+import { isValidHeaderName, optionalText } from "@/src/domain/utils/rule-validation";
 import type {
   EditableRule,
   FolderOption,
@@ -89,7 +89,7 @@ export function readFormValues(): RuleFormValues | null {
   const headerNameInput = byId<HTMLInputElement>("f-name");
   const headerName = headerNameInput.value.trim();
 
-  if (!headerName) {
+  if (!headerName || !isValidHeaderName(headerName)) {
     headerNameInput.classList.add("input-error");
     headerNameInput.setAttribute("aria-invalid", "true");
     headerNameInput.focus();

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   isRuleOperation,
   isRuleType,
+  isValidHeaderName,
+  isValidHeaderValue,
   normalizeRule,
   optionalText,
 } from "@/src/domain/utils/rule-validation";
@@ -20,6 +22,35 @@ describe("isRuleType / isRuleOperation", () => {
     expect(isRuleType(1)).toBe(false);
     expect(isRuleOperation("bogus")).toBe(false);
     expect(isRuleOperation(null)).toBe(false);
+  });
+});
+
+describe("isValidHeaderName", () => {
+  it("accepts RFC 7230 token characters", () => {
+    expect(isValidHeaderName("Content-Type")).toBe(true);
+    expect(isValidHeaderName("X-Custom_Header")).toBe(true);
+    expect(isValidHeaderName("Authorization")).toBe(true);
+  });
+
+  it("rejects spaces, control chars, and empty names", () => {
+    expect(isValidHeaderName("bad header")).toBe(false);
+    expect(isValidHeaderName("X-Test\r\nInjected")).toBe(false);
+    expect(isValidHeaderName("X:Test")).toBe(false);
+    expect(isValidHeaderName("")).toBe(false);
+  });
+});
+
+describe("isValidHeaderValue", () => {
+  it("accepts printable values and empty", () => {
+    expect(isValidHeaderValue("application/json")).toBe(true);
+    expect(isValidHeaderValue("Bearer abc.def")).toBe(true);
+    expect(isValidHeaderValue("")).toBe(true);
+  });
+
+  it("rejects control characters including CR/LF", () => {
+    expect(isValidHeaderValue("a\r\nInjected: 1")).toBe(false);
+    expect(isValidHeaderValue("a\nb")).toBe(false);
+    expect(isValidHeaderValue("a\x00b")).toBe(false);
   });
 });
 
