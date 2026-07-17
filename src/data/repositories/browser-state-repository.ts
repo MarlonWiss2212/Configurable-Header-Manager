@@ -7,7 +7,6 @@ import { DnrRuleMapper } from "@/src/data/mappers/dnr-rule-mapper";
 import { RuleStateMapper } from "@/src/data/mappers/rule-state-mapper";
 import { BrowserRuleStorageDataSource } from "@/src/data/datasources/browser-rule-storage-data-source";
 import { DnrDataSource } from "@/src/data/datasources/dnr-data-source";
-import { RemoteRuleFileDataSource } from "@/src/data/datasources/remote-rule-file-data-source";
 
 export class BrowserStateRepository implements StateRepository {
   private readonly dnrMapper = new DnrRuleMapper();
@@ -17,7 +16,6 @@ export class BrowserStateRepository implements StateRepository {
     private readonly migration: MigrationRepository,
     private readonly storage = new BrowserRuleStorageDataSource(),
     private readonly dnr = new DnrDataSource(),
-    private readonly remote = new RemoteRuleFileDataSource(),
   ) {}
 
   async loadState(): Promise<RuleState> {
@@ -43,6 +41,9 @@ export class BrowserStateRepository implements StateRepository {
   }
 
   parseRules(text: string): RuleState {
+    if (text.length > 2_000_000) {
+      throw new DataError("That JSON is too large to import (max 2 MB).");
+    }
     let parsed: unknown;
     try {
       parsed = JSON.parse(text.trim());
@@ -56,7 +57,12 @@ export class BrowserStateRepository implements StateRepository {
     return JSON.stringify(this.stateMapper.toRuleStateModel(state), null, 2);
   }
 
-  async fetchRules(url: string): Promise<RuleState> {
-    return this.migration.migrateToCurrent(await this.remote.fetchJson(url));
+  async loadGlobalEnabled(): Promise<boolean> {
+    const raw = await this.storage.loadRawGlobalEnabled();
+    return raw !== false;
+  }
+
+  saveGlobalEnabled(enabled: boolean): Promise<void> {
+    return this.storage.saveGlobalEnabled(enabled);
   }
 }

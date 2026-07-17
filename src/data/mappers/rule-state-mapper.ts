@@ -46,6 +46,7 @@ export class RuleStateMapper {
         id: folder.id,
         name: folder.name,
         ...(folder.collapsed ? { collapsed: true } : {}),
+        ...(folder.color ? { color: folder.color } : {}),
         rules: folder.rules.map((rule) => this.toRuleModel(rule)),
       })),
       rules: state.rules.map((rule) => this.toRuleModel(rule)),
@@ -68,6 +69,7 @@ export class RuleStateMapper {
       headerValue: String(model.headerValue ?? ""),
       name: optionalText(model.name),
       comment: optionalText(model.comment),
+      color: optionalText(model.color),
     });
   }
 
@@ -81,6 +83,7 @@ export class RuleStateMapper {
       headerValue: rule.headerValue,
       ...(rule.name ? { name: rule.name } : {}),
       ...(rule.comment ? { comment: rule.comment } : {}),
+      ...(rule.color ? { color: rule.color } : {}),
     };
   }
 
@@ -102,6 +105,7 @@ export class RuleStateMapper {
         name,
         rules: this.toRules(Array.isArray(model.rules) ? model.rules : [], nextId),
         collapsed: model.collapsed === true || undefined,
+        color: optionalText(model.color),
       });
     }
 

@@ -12,12 +12,14 @@ export interface RuleModel {
   headerValue?: string;
   name?: string;
   comment?: string;
+  color?: string;
 }
 
 export interface RuleFolderModel {
   id?: string;
   name?: string;
   collapsed?: boolean;
+  color?: string;
   rules?: RuleModel[];
 }
 
