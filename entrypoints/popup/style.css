@@ -16,31 +16,18 @@
   --primary-faint: rgba(0, 122, 255, 0.12);
 
   /* Semantic */
-  --success: #34c759;
   --danger: #ff3b30;
   --danger-faint: rgba(255, 59, 48, 0.1);
 
-  /* Border */
-  --border: #d1d1d6;
-
-  /* Badge colours */
-  --req-bg: #dbeafe;
-  --req-fg: #1d4ed8;
-  --res-bg: #ede9fe;
-  --res-fg: #6d28d9;
-  --set-bg: #f2f2f7;
-  --set-fg: #3a3a3c;
-  --remove-bg: rgba(255, 59, 48, 0.1);
-  --remove-fg: #c0392b;
-  --append-bg: rgba(52, 199, 89, 0.12);
-  --append-fg: #166534;
+  /* Border — soft hairline for structural dividers */
+  --border: #e6e6ec;
 
   /* Toggle */
   --toggle-w: 36px;
   --toggle-h: 20px;
   --toggle-knob: 16px;
   --toggle-off: var(--bg-tertiary);
-  --toggle-on: var(--success);
+  --toggle-on: var(--primary);
 
   /* Shape */
   --r-xs: 4px;
@@ -62,20 +49,9 @@
     --primary: #0a84ff;
     --primary-hover: #409cff;
     --primary-faint: rgba(10, 132, 255, 0.15);
-    --success: #30d158;
     --danger: #ff453a;
     --danger-faint: rgba(255, 69, 58, 0.14);
     --border: #3a3a3c;
-    --req-bg: rgba(10, 132, 255, 0.16);
-    --req-fg: #64b5ff;
-    --res-bg: rgba(191, 90, 242, 0.16);
-    --res-fg: #cc7ef5;
-    --set-bg: #3a3a3c;
-    --set-fg: #aeaeb2;
-    --remove-bg: rgba(255, 69, 58, 0.16);
-    --remove-fg: #ff6b63;
-    --append-bg: rgba(48, 209, 88, 0.16);
-    --append-fg: #4cd964;
     --toggle-off: #3a3a3c;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.22);
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.36);
@@ -158,6 +134,12 @@ body {
 .header-end {
   display: flex;
   justify-content: flex-end;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .header-brand {
@@ -287,9 +269,20 @@ body {
 }
 
 /* ── Rules list container ───────────────────────────────────────────────── */
+.search-bar {
+  padding: 8px 12px 4px;
+  background: var(--bg);
+}
+/* Hide the dated native search clear/decoration buttons */
+.search-bar .input::-webkit-search-cancel-button,
+.search-bar .input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .rules-list {
   list-style: none;
-  padding: 0;
+  padding: 10px 12px 14px;
   margin: 0;
   flex: 1;
   overflow-y: auto;
@@ -302,12 +295,9 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  border-radius: var(--r);
   transition: background 0.1s;
-}
-.rule-row:last-child {
-  border-bottom: none;
 }
 .rule-row:hover {
   background: var(--bg-secondary);
@@ -387,11 +377,19 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 16px;
+  padding: 12px 16px;
+  margin-top: 10px;
   background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  border-radius: var(--r);
   cursor: pointer;
   user-select: none;
+}
+.folder-row:first-child {
+  margin-top: 0;
+}
+/* An open folder + its rules form one rounded card: header rounds the top only */
+.folder-row.folder-open {
+  border-radius: var(--r) var(--r) 0 0;
 }
 .folder-row:focus-visible {
   outline: 2px solid var(--primary);
@@ -437,8 +435,97 @@ body {
   opacity: 1;
 }
 
+/* ── Colour accents ─────────────────────────────────────────────────────── */
+/* A coloured left bar plus a tint across the whole row */
+.rule-row.has-accent,
+.folder-row.has-accent {
+  border-left: 3px solid var(--accent);
+  padding-left: 13px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+}
+.rule-row.has-accent:hover,
+.folder-row.has-accent:hover {
+  background: color-mix(in srgb, var(--accent) 26%, var(--bg));
+}
+/* In-folder coloured rows tint over the card fill (higher specificity than .in-folder) */
+.rule-row.in-folder.has-accent {
+  padding-left: 29px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg-secondary));
+}
+.rule-row.in-folder.has-accent:hover {
+  background: color-mix(in srgb, var(--accent) 26%, var(--bg-secondary));
+}
+
+/* Folder colour button — shows the current colour; opens the colour dialog */
+.folder-color-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.folder-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1.5px var(--border) inset;
+}
+
+.color-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.color-picker input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.color-picker .swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: var(--swatch, transparent);
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px var(--border) inset;
+}
+.color-picker .swatch-none {
+  background: var(--bg-secondary);
+  position: relative;
+}
+.color-picker .swatch-none::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-top: 1.5px solid var(--danger);
+  transform: rotate(45deg);
+}
+.color-picker input[type="radio"]:checked + .swatch {
+  border-color: var(--text);
+}
+.color-picker input[type="radio"]:focus-visible + .swatch {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.ie-warning {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Rules inside a folder share the card's fill and sit flush (no per-row rounding
+   or spacing); only the last one rounds the card's bottom corners. */
 .rule-row.in-folder {
   padding-left: 32px;
+  border-radius: 0;
+  background: var(--bg-secondary);
+}
+.rule-row.in-folder:hover {
+  background: var(--bg-tertiary);
+}
+.rule-row.in-folder-last {
+  border-radius: 0 0 var(--r) var(--r);
 }
 
 .rule-actions {
@@ -511,36 +598,19 @@ body {
 }
 
 /* ── Badges ─────────────────────────────────────────────────────────────── */
+/* One calm, neutral badge style — the text (REQ/SET/…) carries the meaning, not colour */
 .badge {
   display: inline-flex;
   align-items: center;
   padding: 2px 6px;
   border-radius: var(--r-xs);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   flex-shrink: 0;
   line-height: 1.5;
-}
-.badge-req {
-  background: var(--req-bg);
-  color: var(--req-fg);
-}
-.badge-res {
-  background: var(--res-bg);
-  color: var(--res-fg);
-}
-.badge-set {
-  background: var(--set-bg);
-  color: var(--set-fg);
-}
-.badge-remove {
-  background: var(--remove-bg);
-  color: var(--remove-fg);
-}
-.badge-append {
-  background: var(--append-bg);
-  color: var(--append-fg);
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
 }
 
 /* ── Empty state ────────────────────────────────────────────────────────── */
@@ -581,7 +651,7 @@ body {
   justify-content: space-between;
   padding: 8px 12px;
   border-top: 1px solid var(--border);
-  background: var(--bg-secondary);
+  background: var(--bg);
 }
 
 .footer-right {
@@ -624,14 +694,21 @@ body {
   gap: 18px;
 }
 
-/* Extra breathing room above the segmented controls row */
-#rule-form .field-row {
-  margin-top: 6px;
+/* Labelled hairline divider separating the matching/header fields from the display-only ones */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0;
+  font-size: 11px;
+  color: var(--text-muted);
 }
-
-/* Extra breathing room between Header Name and Header Value */
-#f-value-row {
-  margin-top: 6px;
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .field {
@@ -777,7 +854,7 @@ body {
 
 /* ── Import / Export view ───────────────────────────────────────────────── */
 .ie-body {
-  padding: 20px 18px 24px;
+  padding: 16px 18px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -789,32 +866,43 @@ body {
   gap: 8px;
 }
 
-.url-import-row {
+/* The JSON editor block, separated from the file dropzone above it */
+.ie-editor {
   display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.url-import-row .input {
-  flex: 1;
-  min-width: 0;
-}
-.url-import-row .btn {
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
-.divider {
+/* ── Folder colour dialog ───────────────────────────────────────────────── */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--text-muted);
-  font-size: 11.5px;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.35);
 }
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+.dialog-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .code-area {

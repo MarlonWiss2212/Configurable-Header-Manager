@@ -54,10 +54,11 @@ Top-level `rules` are ungrouped rules. Rules inside folders do not include a `fo
 | `headerValue` | `string` | For `set`/`append` | `""` | Header value (ignored for `remove`) |
 | `name` | `string` | No | — | **Display only.** Shown in the list instead of the header name |
 | `comment` | `string` | No | — | **Display only.** Free-text note shown in the list |
+| `color` | `string` | No | — | **Display only.** Hex colour accent (e.g. `"#ff3b30"`) shown in the list |
 
 > **Note:** `append` is only supported for **response** headers. The UI disables it for request headers automatically.
 >
-> `name` and `comment` never affect matching and are never sent with requests.
+> `name`, `comment`, and `color` never affect matching and are never sent with requests.
 
 ## Folder Fields
 
@@ -67,6 +68,7 @@ Top-level `rules` are ungrouped rules. Rules inside folders do not include a `fo
 | `name` | `string` | **Yes** | Folder label shown in the popup |
 | `rules` | `Rule[]` | **Yes** | Ordered rules in this folder |
 | `collapsed` | `boolean` | No | **Display only.** Whether the folder is collapsed in the list |
+| `color` | `string` | No | **Display only.** Hex colour accent shown in the list |
 
 > Only `schemaVersion: 2` files are accepted — there is no legacy format support.
 > Exports never contain rule `id`s; importers assign fresh ids and ignore any present.
@@ -90,22 +92,16 @@ half-typed pattern like `example.c` will not silently match unrelated sites.
 
 ## Importing
 
-The Import / Export view accepts pasted JSON, imported `.json` files, or a URL pointing to a hosted JSON file.
-Hosted files must include CORS headers:
+The Import / Export view imports a full schema-v2 JSON document — dropped/chosen as a `.json` file
+or pasted into the editor — in one of two modes:
 
-```
-Access-Control-Allow-Origin: *
-Content-Type: application/json
-```
+| Mode | Behaviour |
+|---|---|
+| **Merge** (default) | Adds the imported rules to your existing ones (folders are matched by name) |
+| **Replace** | Overwrites all existing rules and folders with the imported ones |
 
-**Suitable hosts:** GitHub raw URLs, S3 public buckets, any CDN, or a simple static file server.
-
-Example GitHub raw URL:
-```
-https://raw.githubusercontent.com/MarlonWiss2212/Configurable-Header-Manager/refs/heads/main/docs/example-rules.json
-```
-
-Imports only populate the JSON editor first — you still review and save to apply the rules.
+Use **Download** to export your current configuration. Everything runs locally — the extension
+makes no network requests.
 
 ## See also
 

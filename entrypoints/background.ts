@@ -4,9 +4,14 @@ import { BrowserStateRepository } from "@/src/data/repositories/browser-state-re
 import { RuleMigrationRepository } from "@/src/data/repositories/rule-migration-repository";
 
 export default defineBackground(() => {
-  browser.runtime.onInstalled.addListener(async () => {
-    const repository = new BrowserStateRepository(new RuleMigrationRepository());
-    const state = await new LoadRuleStateUseCase(repository).execute();
-    await new ApplyActiveRulesUseCase(repository).execute(state);
-  });
+  const repository = new BrowserStateRepository(new RuleMigrationRepository());
+  const loadRuleState = new LoadRuleStateUseCase(repository);
+  const applyActiveRules = new ApplyActiveRulesUseCase(repository);
+
+  const apply = async (): Promise<void> => {
+    await applyActiveRules.execute(await loadRuleState.execute());
+  };
+
+  browser.runtime.onInstalled.addListener(() => void apply());
+  browser.runtime.onStartup.addListener(() => void apply());
 });

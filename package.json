@@ -4,6 +4,22 @@
   "private": true,
   "version": "1.1.0",
   "type": "module",
+  "license": "MIT",
+  "author": "Marlon Wisskirchen",
+  "homepage": "https://github.com/MarlonWiss2212/Configurable-Header-Manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarlonWiss2212/Configurable-Header-Manager.git"
+  },
+  "keywords": [
+    "headers",
+    "http",
+    "chrome",
+    "firefox",
+    "edge",
+    "declarativeNetRequest",
+    "browser-extension"
+  ],
   "packageManager": "pnpm@10.34.0",
   "scripts": {
     "dev": "wxt",
@@ -25,9 +41,12 @@
     "check": "pnpm compile && pnpm lint && pnpm fmt:check",
     "taze:minor": "taze minor -wIr",
     "taze:major": "taze major -wIr",
+    "changeset": "changeset",
+    "version": "changeset version",
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
+    "@changesets/cli": "latest",
     "happy-dom": "latest",
     "oxfmt": "latest",
     "oxlint": "latest",
